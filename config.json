@@ -1,0 +1,8 @@
+{
+  "resource": {
+    "path": "./test/resource"
+  },
+  "security": {
+    "allowIsTheDefault": true
+  }
+}
