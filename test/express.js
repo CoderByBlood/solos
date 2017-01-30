@@ -1,5 +1,5 @@
 /*
- * (c) 2015 by Three Pawns, Inc.
+ * Copyright (c) 2015 by Three Pawns, Inc. All rights reserved.
  */
 
 'use strict';
