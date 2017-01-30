@@ -1,17 +1,19 @@
 /**
  * Copyright (c) 2015, Three Pawns, Inc. All rights reserved.
  */
-"use strict";
 
-const scanner = require("./scanner");
-const entityBinder = require("./entity");
-const methodBinder = require("./method");
-const assembler = require("./assembler");
-const processor = require("./processor");
+'use strict';
+
+const scanner = require('./scanner');
+const entityBinder = require('./entity');
+const methodBinder = require('./method');
+const assembler = require('./assembler');
+const processor = require('./processor');
 
 /**
  * @module solos
- * @description Pass this method in to the Express app use binding with the solos configuration data.
+ * @description Pass this method in to the Express app use binding with the solos
+ * configuration data.
  *
  *  <dl>
  *      <dt>The required configuration items for solos are:</dt>
@@ -29,14 +31,21 @@ const processor = require("./processor");
  * @param seneca Seneca instance to use for message passing
  * @param config JSON configuration for solos
  */
-exports.init = function (router, seneca, config) {
-    router.config = config;
-    seneca.use(assembler, config);
-    seneca.use(processor, config);
-    seneca.use(scanner, config);
-    seneca.use(entityBinder, {app: router});
-    seneca.use(methodBinder, {app: router});
-    seneca.act({role: "solos", cmd: "assemble"});
+exports.init = function init(router, seneca, config) {
+  router.config = config;
+  seneca.use(assembler, config);
+  seneca.use(processor, config);
+  seneca.use(scanner, config);
+  seneca.use(entityBinder, {
+    app: router,
+  });
+  seneca.use(methodBinder, {
+    app: router,
+  });
+  seneca.act({
+    role: 'solos',
+    cmd: 'assemble',
+  });
 };
 
 

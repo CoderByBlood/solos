@@ -2,31 +2,30 @@
  * Copyright (c) 2015 by Three Pawns, Inc.
  */
 
-"use strict";
+'use strict';
 
-exports.bind = function (options, callback) {
-    var error;
+exports.bind = function bind(options, callback) {
+  let error;
 
-    try {
-        var seneca = options.seneca;
-        var param = options.param;
+  try {
+    const seneca = options.seneca;
+    const param = options.param;
 
-        var entity = seneca.make(param);
-        entity.id = "5";
-        entity.name = 'Apple';
-        entity.price = 1.99;
+    const entity = seneca.make(param);
+    entity.id = '5';
+    entity.name = 'Apple';
+    entity.price = 1.99;
 
-        entity.save$(function (err, foo) {
-            seneca.log.info(foo);
-        });
+    entity.save$((err, foo) => {
+      seneca.log.info(foo);
+    });
 
-        entity.load$(entity.id, function (err, foo) {
-            seneca.log.info(foo);
-        });
+    entity.load$(entity.id, (err, foo) => {
+      seneca.log.info(foo);
+    });
+  } catch (err) {
+    error = err;
+  }
 
-    } catch (err) {
-        error = err;
-    }
-
-    callback(error);
+  callback(error);
 };
