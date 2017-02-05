@@ -26,22 +26,6 @@ const seneca = require('seneca')(config);
 app.use('/', router);
 seneca.use('entity');
 
-// If you want to change how files are required
-seneca.add({
-  role: 'solos',
-  cmd: 'require',
-}, (msg, respond) => {
-  let error;
-
-  try {
-    msg.module = require(`./${msg.path}`); // change string passed to require()
-  } catch (err) {
-    error = err;
-  }
-
-  respond(error, msg);
-});
-
 // initialize solos
 solos.init(router, seneca, config);
 

@@ -143,70 +143,23 @@ function authorize(msg, done) {
  */
 MethodBinder.prototype.executeMethod = function executeMethod(method) {
   const THIS = this;
+  const chains = []; // cached chains of responsibility
 
   return function execute(req, res, next) {
+    THIS.logger.debug('Executing Method', method);
     const methodName = method.methodName;
-    const uri = method.uri;
+    const uri = method.uri === '' ? '/' : method.uri;
 
     req[MethodBinder.EXECUTING] = method;
     req.uuid = UUID.v4();
 
     let responded = false;
 
-    // Create Chain of Responsibility
-    // Rule 1: Each link must honor the lifecycle function taking msg and callback parameters
-    // Rule 2: Each link must short circuit if headers have already been sent
-    // Rule 3: The exception to Rule 2
-    //    the AFTER lifecycle should always be called if an only if RESPOND was called
-    // Rule 4: Each link must short circuit upon error (first argument to callback) - no exceptions
-    const chain = MethodBinder.LIFECYCLE.map((lifecycle, index) => {
-      let link = {};
-      const pattern = {
-        role: 'solos',
-        cmd: methodName,
-        path: uri,
-        cycle: lifecycle,
-      };
+    // Lookup existing chain
+    chains[uri] = chains[uri] || [];
+    let chain = chains[uri][methodName];
 
-      THIS.logger.debug('Method Info', {
-        name: lifecycle,
-        method: method[lifecycle],
-      });
-
-      THIS.seneca.add(pattern, (args, callback) => {
-        if (typeof method[lifecycle] === typeof Function && method[lifecycle].length > 1) {
-          method[lifecycle](args, callback);
-        } else {
-          THIS.logger.info('EXECUTING - Missing Lifecycle', {
-            method: methodName,
-            uri,
-            cycle: lifecycle,
-          });
-          callback(undefined, args);
-        }
-      });
-
-      link = function (err, msg) {
-        if (err) {
-          chain[index + 1](err, msg);
-        } else {
-          if (!msg.res.headersSent && lifecycle === MethodBinder.RESPOND) {
-            responded = true;
-          }
-
-          if (!msg.res.headersSent || (responded && lifecycle === MethodBinder.AFTER_RESPONSE)) {
-            THIS.seneca.act(pattern, msg, (error, result) => {
-              chain[index + 1](error, result);
-            });
-          } else {
-            chain[index + 1](undefined, msg);
-          }
-        }
-      };
-
-      return link;
-    });
-
+    // Always the last link in the chain
     function lastLink(err, msg) {
       if (err) {
         next(err);
@@ -220,9 +173,69 @@ MethodBinder.prototype.executeMethod = function executeMethod(method) {
       }
     }
 
-    chain.push(lastLink);
+    if (chain) {
+      THIS.logger.debug('Using cached chain', chain);
+    } else {
+      // Create Chain of Responsibility
+      // Rule 1: Each link MUST honor the lifecycle function taking msg and callback parameters
+      // Rule 2: Each link MUST short circuit if headers have already been sent
+      // Rule 3: The exception to Rule 2
+      //    the AFTER lifecycle should always be called if an only if RESPOND was called
+      // Rule 4: Each link MUST short circuit upon error (first argument to callback)
+      chain = MethodBinder.LIFECYCLE.map((lifecycle, index) => {
+        let link = {};
+        const pattern = {
+          role: 'solos',
+          cmd: methodName,
+          path: uri,
+          cycle: lifecycle,
+        };
 
-    // go!
+        THIS.logger.debug('Method Info', {
+          name: lifecycle,
+          method: method[lifecycle],
+        });
+
+        THIS.seneca.add(pattern, (args, callback) => {
+          THIS.logger.info('Executing Pattern', pattern);
+          if (typeof method[lifecycle] === typeof Function && method[lifecycle].length > 1) {
+            method[lifecycle](args, callback);
+          } else {
+            THIS.logger.info('EXECUTING - Missing Lifecycle', {
+              method: methodName,
+              uri,
+              cycle: lifecycle,
+            });
+            callback(undefined, args);
+          }
+        });
+
+        link = function (err, msg) {
+          if (err) {
+            chain[index + 1](err, msg);
+          } else {
+            if (!msg.res.headersSent && lifecycle === MethodBinder.RESPOND) {
+              responded = true;
+            }
+
+            if (!msg.res.headersSent || (responded && lifecycle === MethodBinder.AFTER_RESPONSE)) {
+              THIS.seneca.act(pattern, msg, (error, result) => {
+                chain[index + 1](error, result);
+              });
+            } else {
+              chain[index + 1](undefined, msg);
+            }
+          }
+        };
+
+        return link;
+      });
+
+      chain.push(lastLink);
+      chains[uri][methodName] = chain; // Cache the chain
+    }
+
+    // GO!
     chain[0](undefined, {
       req,
       res,

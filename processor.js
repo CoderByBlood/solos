@@ -11,22 +11,19 @@ module.exports = function process(/* unused options parameter */) {
     role: 'solos',
     cmd: 'require',
   }, (msg, respond) => {
-    this.prior(msg, (err, out) => {
-      let error = err;
-      msg.module = out ? out.module : null;
+    let error;
 
-      if (!error && !msg.module) {
-        try {
-          /* eslint-disable global-require, import/no-dynamic-require */
-          msg.module = require(`./${msg.path}`);
-          /* eslint-enable */
-        } catch (erred) {
-          error = erred;
-        }
+    if (!error && !msg.module) {
+      try {
+        /* eslint-disable global-require, import/no-dynamic-require */
+        msg.module = require(msg.path);
+        /* eslint-enable */
+      } catch (err) {
+        error = err;
       }
+    }
 
-      respond(error, msg);
-    });
+    respond(error, msg);
   });
 
   this.add({

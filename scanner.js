@@ -301,6 +301,7 @@ Scanner.recursiveScan = function recursiveScan(resource) {
   fs.readdirSync(resource.root).forEach((node) => {
     resource.node = node;
     const path = `${resource.path}/${resource.node}`;
+    const abs = fs.realpathSync(path);
 
     const stats = fs.statSync(path);
     if (stats.isDirectory() && resource.scanner.isResourceDirectory(resource.node)) {
@@ -327,14 +328,16 @@ Scanner.recursiveScan = function recursiveScan(resource) {
         }
 
         resource.scanner.sendMethodFound(
-          resource.node, path,
+          resource.node,
+          abs,
           resource.scanner.generatePermission(topic, method, inMe),
-          resource.uri, method);
+          resource.uri,
+          method);
       } else if (resource.scanner.isEntity(resource.node)) {
         const entityName = resource.scanner.getEntityName(resource.node);
-        resource.scanner.sendEntityFound(resource.node, path, entityName);
+        resource.scanner.sendEntityFound(resource.node, abs, entityName);
       } else {
-        resource.scanner.sendUnhandledResource(resource.node, path);
+        resource.scanner.sendUnhandledResource(resource.node, abs);
       }
     }
   });
