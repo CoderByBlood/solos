@@ -1,6 +1,6 @@
 {
   "name": "rapid-solos",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Express.js based RESTful framework",
   "main": "solos.js",
   "author": "Brilliancy Software a Three Pawns, Inc. Company",
