@@ -4,6 +4,16 @@
 
 ```js
 const config = require('./config.json'); // load your configuraiton
+/*
+{
+  "resource": {
+    "path": "./solos" // path must exist
+  },
+  "security": {
+    "allowIsTheDefault": true
+  }
+}
+*/
 
 const express = require('express');
 const solos = require('rapid-solos');
