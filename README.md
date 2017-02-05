@@ -61,7 +61,7 @@ $ npm install rapid-solos
 
 ## Philosophy
 
-  The solos philosophy is the configuraiton is great accerlerator to developing RESTful applications.
+  The solos philosophy is that configuration is great accerlerator to developing RESTful applications.
 
 ## Examples
 
