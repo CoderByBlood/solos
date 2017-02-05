@@ -13,7 +13,7 @@ module.exports = function process(/* unused options parameter */) {
   }, (msg, respond) => {
     this.prior(msg, (err, out) => {
       let error = err;
-      msg.module = out.module;
+      msg.module = out ? out.module : null;
 
       if (!error && !msg.module) {
         try {
