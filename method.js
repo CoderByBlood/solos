@@ -52,7 +52,9 @@ MethodBinder.REQUEST_RECEIVED = 'request_received';
 MethodBinder.VALIDATE_REQUEST = 'validate';
 
 /**
- * Lifecycle function name for securing access to endpoint
+ * Lifecycle function name for authorizing the user to endpoint.
+ * Define this only if you want to override the default behavior, which uses express-authorize
+ * to authorize the call.
  *
  * @type {string}
  */
@@ -66,21 +68,25 @@ MethodBinder.AUTHORIZE_REQUEST = 'authorize';
 MethodBinder.PERMISSION = 'permission';
 
 /**
- * Lifecycle function name for pre-processing the request
+ * Lifecycle function name for pre-processing the request.
  *
  * @type {string}
  */
 MethodBinder.BEFORE_RESPONSE = 'before';
 
 /**
- * Lifecycle function name for processing the request
+ * Lifecycle function name for processing the request.
+ * This call must send a response to the client.  A response can be sent using any means that
+ * express supports including template engines.  If a response is not sent, solos sends a 405 to
+ * the client.
  *
  * @type {string}
  */
 MethodBinder.RESPOND = 'respond';
 
 /**
- * Lifecycle function name for post-processing and cleanup
+ * Lifecycle function name for post-processing and cleanup.
+ * This is only called if 'respond' was called.
  *
  * @type {string}
  */
@@ -165,7 +171,7 @@ MethodBinder.prototype.executeMethod = function executeMethod(method) {
         next(err);
       } else if (!msg.res.headersSent) {
         msg.res.sendStatus(405);
-        msg.logger.error('Method Completed without Response sending 405', msg);
+        msg.logger.error('Method Completed without Response, sending 405', msg);
         next(new Error('405'));
       } else {
         // give control back to express
@@ -197,7 +203,7 @@ MethodBinder.prototype.executeMethod = function executeMethod(method) {
         });
 
         THIS.seneca.add(pattern, (args, callback) => {
-          THIS.logger.info('Executing Pattern', pattern);
+          THIS.logger.debug('Executing Pattern', pattern);
           if (typeof method[lifecycle] === typeof Function && method[lifecycle].length > 1) {
             method[lifecycle](args, callback);
           } else {
