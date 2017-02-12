@@ -27,8 +27,8 @@
  * │   │       └── sample
  * │   │           └── delete.js  <-- DELETE http://domain.com/beta/:beta/sample/
  * │   └── entities
- * │       ├── alpha-entity.js  <-- loaded into req.solos_context.entities.alpha for each /:alpha/
- * │       └── beta-entity.js  <-- loaded into req.solos_context.entities.beta for each /:beta/
+ * │       ├── alpha-entity.js  <-- binding into req.solos_context.entities.alpha for /:alpha/
+ * │       └── beta-entity.js  <-- binding into req.solos_context.entities.beta for /:beta/
  */
 /* eslint-enable */
 
