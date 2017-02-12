@@ -190,30 +190,10 @@ MethodBinder.prototype.executeMethod = function executeMethod(method) {
       // Rule 4: Each link MUST short circuit upon error (first argument to callback)
       chain = MethodBinder.LIFECYCLE.map((lifecycle, index) => {
         let link = {};
-        const pattern = {
-          role: 'solos',
-          cmd: methodName,
-          path: uri,
-          cycle: lifecycle,
-        };
 
         THIS.logger.debug('Method Info', {
           name: lifecycle,
           method: method[lifecycle],
-        });
-
-        THIS.seneca.add(pattern, (args, callback) => {
-          THIS.logger.debug('Executing Pattern', pattern);
-          if (typeof method[lifecycle] === typeof Function && method[lifecycle].length > 1) {
-            method[lifecycle](args, callback);
-          } else {
-            THIS.logger.info('EXECUTING - Missing Lifecycle', {
-              method: methodName,
-              uri,
-              cycle: lifecycle,
-            });
-            callback(undefined, args);
-          }
         });
 
         link = function (err, msg) {
@@ -225,9 +205,19 @@ MethodBinder.prototype.executeMethod = function executeMethod(method) {
             }
 
             if (!msg.res.headersSent || (responded && lifecycle === MethodBinder.AFTER_RESPONSE)) {
-              THIS.seneca.act(pattern, msg, (error, result) => {
-                chain[index + 1](error, result);
-              });
+              if (typeof method[lifecycle] === typeof Function && method[lifecycle].length > 1) {
+                method[lifecycle](msg, (error, result) => {
+                  chain[index + 1](error, result);
+                });
+              } else {
+                THIS.logger.info('EXECUTING - Missing Lifecycle', {
+                  method: methodName,
+                  uri,
+                  cycle: lifecycle,
+                });
+
+                chain[index + 1](err, msg);
+              }
             } else {
               chain[index + 1](undefined, msg);
             }
