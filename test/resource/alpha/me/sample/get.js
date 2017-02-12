@@ -2,7 +2,7 @@
 /**
  * Copyright (c) 2015 by Three Pawns, Inc. All rights reserved.
  * 
- * The Lifecycle functions are call in the order they are defined in this file.
+ * The Lifecycle functions are called in the order they are defined in this file.
  * All functions are optional except 'respond(msg, done)'.
  * If defined, the first parameter 'msg' has req, res properties which give you access to the
  * http request and http response -and- the second parameter 'done' is the callback that

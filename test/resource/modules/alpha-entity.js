@@ -7,7 +7,7 @@
 /**
  * This is called as the parameter is bound into express at load time.
  * 'seneca.make(param).load$(id, (err, found) => { ... });' is called at runtime.
- * Seneca can be accessed throuhg 'options.seneca' and param can be accessed
+ * Seneca can be accessed through 'options.seneca' and param can be accessed
  * through 'options.param'.
  * The callback has the standrard callback(error, result) signature.  However, only
  * the error parameter in the callback is inspected.

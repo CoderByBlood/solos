@@ -1,6 +1,7 @@
 # RAPID SOLOS
 
-  Express.js and Seneca.js based RESTful framework
+  Express.js and Seneca.js based RESTful framework that uses a directory structure to mimic a REST URI,
+  and uses filenames for HTTP methods.  All HTTP methods supported by Express are supported.
 
 ## Philosophy
 
@@ -70,7 +71,7 @@ const server = app.listen(3000, () => {
 ### Example http method (get.js)
 ```js
 /*
- * The Lifecycle functions are call in the order they are defined below.
+ * The Lifecycle functions are called in the order they are defined below.
  * All functions are optional except 'respond(msg, done)'.
  * If defined, the first parameter 'msg' has req, res properties which give you access to the
  * http request and http response -and- the second parameter 'done' is the callback that
@@ -154,7 +155,7 @@ exports.after = function after(msg, done) {
  * This is called as the parameter is bound into express at load time.
  * 'seneca.make(param).load$(id, (err, found) => { ... });' is called by solos at runtime.
  *
- * Seneca can be accessed throuhg 'options.seneca' and param can be accessed
+ * Seneca can be accessed through 'options.seneca' and param can be accessed
  * through 'options.param'.
  * The callback has the standrard callback(error, result) signature.  However, only
  * the error parameter in the callback is inspected.
