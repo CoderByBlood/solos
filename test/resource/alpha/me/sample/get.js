@@ -58,7 +58,7 @@ exports.validate = function validate(msg, done) {
 
 /**
  * Lifecycle function name for authorizing the user to endpoint.
- * Define this only if you want to override the default behavior, which uses express-authorize
+ * Define this only if you want to override the default behavior, which uses regular expressions
  * to authorize the call.
  */
 exports.authorize = function authorize(msg, done) {

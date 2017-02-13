@@ -37,10 +37,14 @@ const config = require('./config.json'); // load your configuraiton
 /*
 {
   "resource": {
-    "path": "./solos" // <-- path must exist
+    "path": "solos" // default to '.' 
   },
   "security": {
-    "allowIsTheDefault": true  // <-- if not set, is false
+    "allowAll": true,  // defaults to false, only set to true for testing,
+    "groups": {  // define authorization groups where each group is an arry of regular expressions
+      "admin": ["^(GET|POST)[^/]+[/]path[/][^ ]+$"],  // each regexp is tested against 'req.method req.path'
+      "user": []
+    }
   }
 }
 */

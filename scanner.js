@@ -150,21 +150,6 @@ Scanner.prototype.generateUriParam = function generateUriParam(value) {
 };
 
 /**
- * Generates a shiro permission assertion statement from a node , method and
- * whether or not there was a parameterized entity.
- *
- * @param {String} node   The node that is being scanned by the scanner.
- * @param {String}method The HTTP method the node represents.
- * @param {String}isInMe If the scanner has traversed a URI parameter (typically 'me' folder).
- *
- * @return {String} if the parameter <code>isInMe</code> is <code>true</code>, then
- * <code>node:method::owner</code> is returned, otherwise <code>node:method</code> is returned.
- */
-Scanner.prototype.generatePermission = function generatePermission(node, method, isInMe) {
-  return isInMe ? `${node}:${method}::owner` : `${node}:${method}`;
-};
-
-/**
  * Checks to see if parameter <code>value</code> is a valid HTTP method.
  *
  * @param {String} value    The value to test.
@@ -244,11 +229,10 @@ Scanner.prototype.sendMessage = function sendMessage(msg) {
  *
  * @param {String} node       The name of the node on the file system.
  * @param {String} path       The path to the node on the file system.
- * @param {String} permission The permission base on the path.
  * @param {String} uri        The express URI for the router.
  * @param {String} method     The HTTP method name
  */
-Scanner.prototype.sendMethodFound = function sendMethodFound(node, path, permission, uri, method) {
+Scanner.prototype.sendMethodFound = function sendMethodFound(node, path, uri, method) {
   this.sendMessage({
     role: 'solos',
     cmd: 'process',
@@ -257,7 +241,6 @@ Scanner.prototype.sendMethodFound = function sendMethodFound(node, path, permiss
     path,
     uri: uri === '' ? '/' : uri,
     method,
-    permission,
   });
 };
 
@@ -322,13 +305,10 @@ Scanner.recursiveScan = function recursiveScan(resource) {
     } else if (stats.isFile() && resource.scanner.isResourceFile(resource.node)) {
       if (resource.scanner.isMethod(resource.node)) {
         const method = resource.scanner.getHttpMethodFromFileName(resource.node);
-        const inMe = resource.scanner.isParameter(resource.lastNode);
-        const permission = resource.path.replace(resource.scanner.root, '').replace(/^[/]?/, '/');
 
         resource.scanner.sendMethodFound(
           resource.node,
           abs,
-          resource.scanner.generatePermission(permission, method, inMe),
           resource.uri,
           method);
       } else if (resource.scanner.isEntity(resource.node)) {

@@ -58,6 +58,7 @@ describe('solos Integration Tests', () => {
   /* eslint-disable global-require */
   const seneca = require('seneca')();
   const method = require('./resource/alpha/me/sample/get');
+  const config = require('../config.json');
   /* eslint-enable */
 
   seneca.use('scanner', {
@@ -66,6 +67,16 @@ describe('solos Integration Tests', () => {
     },
   });
   method.isAuthorized = noOp;
+
+
+  describe('solos', () => {
+    it('Should add a prototype called config to router', () => {
+      const router = express.Router();
+
+      solos.init(router, seneca, config);
+      router.should.have.property('config');
+    });
+  });
 
   describe('scanner', () => {
     it('should send a method-found-to-be-processed message', (done) => {
@@ -88,7 +99,6 @@ describe('solos Integration Tests', () => {
           msg.should.have.property('path');
           msg.should.have.property('uri');
           msg.should.have.property('method');
-          msg.should.have.property('permission');
         } catch (err) {
           error = err;
           errors.push(error);
@@ -175,7 +185,7 @@ describe('solos Integration Tests', () => {
         cmd: 'process',
         target: 'method',
       }, (msg) => {
-        nodes[msg.resource] = `${msg.path} ${msg.uri} ${msg.permission}`;
+        nodes[msg.resource] = `${msg.path} ${msg.uri}`;
       });
 
       seneca.act({
@@ -199,11 +209,11 @@ describe('solos Integration Tests', () => {
             nodes.should.containEql('alpha-entity.js');
             nodes.should.containEql('beta-entity.js');
 
-            nodes['put.js'].should.containEql('/test/resource/alpha/me/beta/me/gama/put.js /alpha/:alpha/beta/:beta/gama /alpha/me/beta/me/gama:put');
-            nodes['post.js'].should.containEql('/test/resource/alpha/me/post.js /alpha/:alpha /alpha/me:post::owner');
-            nodes['get.js'].should.containEql('/test/resource/alpha/me/sample/get.js /alpha/:alpha/sample /alpha/me/sample:get');
+            nodes['put.js'].should.containEql('/test/resource/alpha/me/beta/me/gama/put.js /alpha/:alpha/beta/:beta/gama');
+            nodes['post.js'].should.containEql('/test/resource/alpha/me/post.js /alpha/:alpha');
+            nodes['get.js'].should.containEql('/test/resource/alpha/me/sample/get.js /alpha/:alpha/sample');
             nodes['alpha-entity.js'].should.containEql('/test/resource/modules/alpha-entity.js');
-            nodes['delete.js'].should.containEql('/test/resource/beta/me/sample/delete.js /beta/:beta/sample /beta/me/sample:delete');
+            nodes['delete.js'].should.containEql('/test/resource/beta/me/sample/delete.js /beta/:beta/sample');
             nodes['beta-entity.js'].should.containEql('/test/resource/modules/beta-entity.js');
           } catch (caught) {
             error = caught;
@@ -515,12 +525,17 @@ describe('solos Integration Tests', () => {
         uri,
       };
 
-      method[MethodBinder.PERMISSION] = 'profile:get::owner';
       method[MethodBinder.AUTHORIZE_REQUEST] = undefined;
+      methodBinder.app.config = config;
+      should.exist(methodBinder.app.config.security);
+      should.exist(methodBinder.app.config.security.groups);
+      should.exist(methodBinder.app.config.security.groups.user);
+      should.equal(methodBinder.app.config.security.allowAll, false);
       req.user = {
         id: '456',
-        roles: ['*:*:456'],
+        groups: ['admin'],
       };
+
       should.not.exist(method[MethodBinder.AUTHORIZE_REQUEST]);
       methodBinder.bind(methodMsg);
       executeMethod(req, res, (err) => {
@@ -535,6 +550,7 @@ describe('solos Integration Tests', () => {
 
           try {
             should.exist(method[MethodBinder.AUTHORIZE_REQUEST]);
+            res.statusCode.should.equal(200);
           } catch (caught) {
             error = caught;
           }
@@ -561,11 +577,15 @@ describe('solos Integration Tests', () => {
         uri,
       };
 
-      method[MethodBinder.PERMISSION] = undefined;
       method[MethodBinder.AUTHORIZE_REQUEST] = undefined;
+      methodBinder.app.config = config;
+      should.exist(methodBinder.app.config.security);
+      should.exist(methodBinder.app.config.security.groups);
+      should.exist(methodBinder.app.config.security.groups.user);
+      should.equal(methodBinder.app.config.security.allowAll, false);
       req.user = {
         id: '456',
-        roles: ['*:*:456'],
+        groups: ['user'],
       };
 
       should.not.exist(method[MethodBinder.AUTHORIZE_REQUEST]);
@@ -595,20 +615,6 @@ describe('solos Integration Tests', () => {
           done(error);
         });
       });
-    });
-  });
-
-  describe('solos', () => {
-    it('Should add a prototype called config to router', () => {
-      const router = express.Router();
-
-      /* eslint-disable global-require */
-      const config = require('../config.json');
-      /* eslint-enable */
-
-      solos.init(router, seneca, config);
-
-      router.should.have.property('config');
     });
   });
 });
