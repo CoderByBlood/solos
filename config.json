@@ -3,6 +3,10 @@
     "path": "./test/resource"
   },
   "security": {
-    "allowIsTheDefault": true
+    "allowAll": false,
+    "groups": {
+      "admin": ["^(GET|POST)[^/]+[/]user[/][^ ]+$"],
+      "user": []
+    }
   }
 }

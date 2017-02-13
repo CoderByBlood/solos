@@ -6,21 +6,12 @@
 
 // These tests exercise code directly and do not require a running server
 
-const authorization = require('express-authorization');
 const Scanner = require('../scanner').Scanner;
 
 
 describe('Solos Unit Tests', () => {
   describe('Scanner', () => {
     const subject = new Scanner();
-
-    it('should return test:get', () => {
-      subject.generatePermission('test', 'get', false).should.equal('test:get');
-    });
-
-    it('should return test:get::owner', () => {
-      subject.generatePermission('test', 'get', true).should.equal('test:get::owner');
-    });
 
     it('should get method from file name', () => {
       subject.getHttpMethodFromFileName('get.js').should.equal('get');
@@ -97,18 +88,6 @@ describe('Solos Unit Tests', () => {
         uriParamTemplate: '{:param-newtemplate}',
       });
       scanner.generateUriParam('node').should.equal('{node-newtemplate}');
-    });
-  });
-
-  describe('Express-Authorize', () => {
-    it('should match this consumer statement for a get', () => {
-      const claim = authorization.considerPermissions('*:*:456');
-      claim.isPermitted('profile:get:456').should.be.true();
-    });
-
-    it('should match this consumer statement for a get', () => {
-      const claim = authorization.considerPermissions('*:put');
-      claim.isPermitted('profile:put').should.be.true();
     });
   });
 });

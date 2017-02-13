@@ -6,7 +6,6 @@
 
 const HTTP = require('http');
 const UUID = require('uuid');
-const Authorization = require('express-authorization');
 
 
 /**
@@ -61,13 +60,6 @@ MethodBinder.VALIDATE_REQUEST = 'validate';
 MethodBinder.AUTHORIZE_REQUEST = 'authorize';
 
 /**
- * Property name of the permission string
- *
- * @type {string}
- */
-MethodBinder.PERMISSION = 'permission';
-
-/**
  * Lifecycle function name for pre-processing the request.
  *
  * @type {string}
@@ -105,28 +97,6 @@ MethodBinder.LIFECYCLE = [
   MethodBinder.RESPOND,
   MethodBinder.AFTER_RESPONSE,
 ];
-
-function authorize(msg, done) {
-  const user = msg.req.user || {};
-  const roles = user.roles || [];
-  const owner = user.id;
-  const replaceRegex = /[:]owner$/;
-  const method = msg.req[MethodBinder.EXECUTING];
-  let claimPermitted = false;
-
-  for (let i = 0; i < roles.length && !claimPermitted; i += 1) {
-    const claim = Authorization.considerPermissions(roles[i]);
-    claimPermitted = claim.isPermitted((method[MethodBinder.PERMISSION] || '').replace(replaceRegex, owner));
-  }
-
-  if (!method.isAuthorized(claimPermitted)) {
-    msg.res.sendStatus(403);
-    msg.logger.debug('Authorization Failed, sending 403', msg);
-    done(new Error('403'), msg);
-  } else {
-    done(undefined, msg);
-  }
-}
 
 
 /**
@@ -253,25 +223,43 @@ MethodBinder.prototype.bind = function bind(msg) {
   const THIS = this;
   const method = msg.method;
   const uri = msg.uri;
-  const permission = msg.permission;
   const httpMethod = msg.httpMethod;
-
-  const config = THIS.app.config;
-
-  if (!method[MethodBinder.PERMISSION]) {
-    method[MethodBinder.PERMISSION] = permission;
-    THIS.logger.debug('Added', {
-      permission,
-      at: uri,
-    });
-  }
+  const config = THIS.app.config || {};
+  const security = config.security || {};
 
   if (!method[MethodBinder.AUTHORIZE_REQUEST]) {
-    method[MethodBinder.AUTHORIZE_REQUEST] = authorize;
+    method[MethodBinder.AUTHORIZE_REQUEST] = function authorize(message, done) {
+      const req = message.req;
+      const groups = security.groups || {};
+      const user = req.user || {};
+      const roles = user.groups || [];
+      let claimPermitted = false;
+
+      for (let i = 0; i < roles.length && !claimPermitted; i += 1) {
+        const regexes = groups[roles[i]] || [];
+
+        for (let j = 0; j < regexes.length && !claimPermitted; j += 1) {
+          const regexp = regexes[j];
+
+          if (regexp) {
+            const claim = `${req.method} ${req.path}`;
+            claimPermitted = claim.match(new RegExp(regexp));
+          }
+        }
+      }
+
+      if (!method.isAuthorized(claimPermitted)) {
+        message.res.sendStatus(403);
+        message.logger.debug('Authorization Failed, sending 403', message);
+        done(new Error('403'), message);
+      } else {
+        done(undefined, message);
+      }
+    };
   }
 
-  if (config && config.security && config.security.allowIsTheDefault) {
-    method.isAuthorized = claimPermitted => !claimPermitted;
+  if (config && config.security && config.security.allowAll) {
+    method.isAuthorized = () => true;
   } else {
     method.isAuthorized = claimPermitted => claimPermitted;
   }
