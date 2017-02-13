@@ -199,11 +199,11 @@ describe('solos Integration Tests', () => {
             nodes.should.containEql('alpha-entity.js');
             nodes.should.containEql('beta-entity.js');
 
-            nodes['put.js'].should.containEql('/test/resource/alpha/me/beta/me/gama/put.js /alpha/:alpha/beta/:beta/gama gama:put::owner');
-            nodes['post.js'].should.containEql('/test/resource/alpha/me/post.js /alpha/:alpha alpha:post');
-            nodes['get.js'].should.containEql('/test/resource/alpha/me/sample/get.js /alpha/:alpha/sample sample:get::owner');
+            nodes['put.js'].should.containEql('/test/resource/alpha/me/beta/me/gama/put.js /alpha/:alpha/beta/:beta/gama /alpha/me/beta/me/gama:put');
+            nodes['post.js'].should.containEql('/test/resource/alpha/me/post.js /alpha/:alpha /alpha/me:post::owner');
+            nodes['get.js'].should.containEql('/test/resource/alpha/me/sample/get.js /alpha/:alpha/sample /alpha/me/sample:get');
             nodes['alpha-entity.js'].should.containEql('/test/resource/modules/alpha-entity.js');
-            nodes['delete.js'].should.containEql('/test/resource/beta/me/sample/delete.js /beta/:beta/sample sample:delete::owner');
+            nodes['delete.js'].should.containEql('/test/resource/beta/me/sample/delete.js /beta/:beta/sample /beta/me/sample:delete');
             nodes['beta-entity.js'].should.containEql('/test/resource/modules/beta-entity.js');
           } catch (caught) {
             error = caught;

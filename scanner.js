@@ -48,6 +48,7 @@ function Scanner(configuration) {
   this.jsRegEx = new RegExp(/[.]js$/);
   this.dirRegEx = new RegExp(/^[^.]/);
   this.seneca = undefined;
+  this.root = undefined;
   this.errors = [];
 }
 
@@ -130,6 +131,7 @@ Scanner.prototype.scan = function scan(resourcePath) {
   const path = (resourcePath || Scanner.DEFAULT_PATH);
   const resource = new Resource(path, path, '', THIS);
 
+  THIS.root = path;
   Scanner.recursiveScan(resource);
 };
 
@@ -159,7 +161,7 @@ Scanner.prototype.generateUriParam = function generateUriParam(value) {
  * <code>node:method::owner</code> is returned, otherwise <code>node:method</code> is returned.
  */
 Scanner.prototype.generatePermission = function generatePermission(node, method, isInMe) {
-  return isInMe ? `${node}:${method}` : `${node}:${method}::owner`;
+  return isInMe ? `${node}:${method}::owner` : `${node}:${method}`;
 };
 
 /**
@@ -253,7 +255,7 @@ Scanner.prototype.sendMethodFound = function sendMethodFound(node, path, permiss
     target: 'method',
     resource: node,
     path,
-    uri,
+    uri: uri === '' ? '/' : uri,
     method,
     permission,
   });
@@ -321,16 +323,12 @@ Scanner.recursiveScan = function recursiveScan(resource) {
       if (resource.scanner.isMethod(resource.node)) {
         const method = resource.scanner.getHttpMethodFromFileName(resource.node);
         const inMe = resource.scanner.isParameter(resource.lastNode);
-        let topic = resource.lastNode;
-
-        if (inMe) {
-          topic = resource.meNode;
-        }
+        const permission = resource.path.replace(resource.scanner.root, '').replace(/^[/]?/, '/');
 
         resource.scanner.sendMethodFound(
           resource.node,
           abs,
-          resource.scanner.generatePermission(topic, method, inMe),
+          resource.scanner.generatePermission(permission, method, inMe),
           resource.uri,
           method);
       } else if (resource.scanner.isEntity(resource.node)) {

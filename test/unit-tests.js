@@ -14,12 +14,12 @@ describe('Solos Unit Tests', () => {
   describe('Scanner', () => {
     const subject = new Scanner();
 
-    it('should return test:get::owner', () => {
-      subject.generatePermission('test', 'get', false).should.equal('test:get::owner');
+    it('should return test:get', () => {
+      subject.generatePermission('test', 'get', false).should.equal('test:get');
     });
 
-    it('should return test:get', () => {
-      subject.generatePermission('test', 'get', true).should.equal('test:get');
+    it('should return test:get::owner', () => {
+      subject.generatePermission('test', 'get', true).should.equal('test:get::owner');
     });
 
     it('should get method from file name', () => {
