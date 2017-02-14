@@ -17,6 +17,16 @@ function MethodBinder(application) {
   this.app = application || {};
   this.seneca = undefined;
   this.logger = undefined;
+  this.config = this.app.config || {};
+
+  const security = this.config.security || {};
+  const groups = JSON.parse(JSON.stringify(security.groups || {}));
+  Object.keys(groups).forEach((key) => {
+    groups[key] = groups[key].map(regex => new RegExp(regex));
+  });
+
+  this.groups = groups;
+  this.allowAll = security.allowAll || false;
 }
 
 
@@ -224,26 +234,23 @@ MethodBinder.prototype.bind = function bind(msg) {
   const method = msg.method;
   const uri = msg.uri;
   const httpMethod = msg.httpMethod;
-  const config = THIS.app.config || {};
-  const security = config.security || {};
 
   if (!method[MethodBinder.AUTHORIZE_REQUEST]) {
     method[MethodBinder.AUTHORIZE_REQUEST] = function authorize(message, done) {
       const req = message.req;
-      const groups = security.groups || {};
       const user = req.user || {};
       const roles = user.groups || [];
       let claimPermitted = false;
 
       for (let i = 0; i < roles.length && !claimPermitted; i += 1) {
-        const regexes = groups[roles[i]] || [];
+        const regexes = THIS.groups[roles[i]] || [];
 
         for (let j = 0; j < regexes.length && !claimPermitted; j += 1) {
-          const regexp = regexes[j];
+          const regex = regexes[j];
 
-          if (regexp) {
+          if (regex) {
             const claim = `${req.method} ${req.path}`;
-            claimPermitted = claim.match(new RegExp(regexp));
+            claimPermitted = claim.match(regex);
           }
         }
       }
@@ -258,7 +265,7 @@ MethodBinder.prototype.bind = function bind(msg) {
     };
   }
 
-  if (config && config.security && config.security.allowAll) {
+  if (THIS.allowAll) {
     method.isAuthorized = () => true;
   } else {
     method.isAuthorized = claimPermitted => claimPermitted;

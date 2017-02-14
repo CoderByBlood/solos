@@ -26,6 +26,7 @@ const createEntityBinder = function (seneca) {
 const createMethodBinder = function (seneca) {
   const methodBinder = new MethodBinder({
     get: noOp,
+    config: seneca.testconfig,
   });
   methodBinder.seneca = seneca;
   methodBinder.logger = seneca.log;
@@ -509,6 +510,8 @@ describe('solos Integration Tests', () => {
     });
 
     it('should intercept method invocations to apply ACLs', (done) => {
+      seneca.testconfig = config;
+
       const test = {
         role: 'test',
         cmd: 'solos.method.acl.intercept',
@@ -526,7 +529,6 @@ describe('solos Integration Tests', () => {
       };
 
       method[MethodBinder.AUTHORIZE_REQUEST] = undefined;
-      methodBinder.app.config = config;
       should.exist(methodBinder.app.config.security);
       should.exist(methodBinder.app.config.security.groups);
       should.exist(methodBinder.app.config.security.groups.user);
@@ -561,6 +563,8 @@ describe('solos Integration Tests', () => {
     });
 
     it('should send 403 status when call violates ACLs', (done) => {
+      seneca.testconfig = config;
+
       const test = {
         role: 'test',
         cmd: 'solos.method.acl.violated.403',
@@ -578,7 +582,6 @@ describe('solos Integration Tests', () => {
       };
 
       method[MethodBinder.AUTHORIZE_REQUEST] = undefined;
-      methodBinder.app.config = config;
       should.exist(methodBinder.app.config.security);
       should.exist(methodBinder.app.config.security.groups);
       should.exist(methodBinder.app.config.security.groups.user);
