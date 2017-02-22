@@ -37,7 +37,7 @@ const config = require('./config.json'); // load your configuraiton
 /*
 {
   "resource": {
-    "path": "solos" // default to '.' 
+    "path": "solos" // optional, default to 'solos' 
   },
   "security": {
     "allowAll": true,  // defaults to false, only set to true for testing,
@@ -77,14 +77,15 @@ const server = app.listen(3000, () => {
 /*
  * The Lifecycle functions are called in the order they are defined below.
  * All functions are optional except 'respond(msg, done)'.
- * If defined, the first parameter 'msg' has req, res properties which give you access to the
- * http request and http response -and- the second parameter 'done' is the callback that
- * has the standard callback(error, result) signature.
+ * If the funciton is defined, the first parameter 'msg' has req, res, seneca, logger, and express
+ * properties which give you access to the http request, http response, seneca, seneca's logger, and
+ * the running express instance -and- the second parameter 'done' is the callback that has the
+ * standard callback(error, result) signature.
  */
 
 
 /**
- * Lifecycle function name that indicates a request to execute the method has been received.
+ * Lifecycle function that indicates a request to execute the method has been received.
  * The request has been authenticated <strong>BUT NOT authorized</strong> as this point
  * in the lifecycle!
  */
@@ -96,7 +97,7 @@ exports.request_received = function requestReceived(msg, done) {
 };
 
 /**
- * Lifecycle function name for validating the user input.
+ * Lifecycle function for validating the user input.
  */
 exports.validate = function validate(msg, done) {
   msg.logger.debug('Callback successful', {
@@ -106,8 +107,8 @@ exports.validate = function validate(msg, done) {
 };
 
 /**
- * Lifecycle function name for authorizing the user to endpoint.
- * Define this only if you want to override the default behavior, which uses regular expressions
+ * Lifecycle function for authorizing the user to endpoint.
+ * Define this ONLY if you want to OVERRIDE the default behavior, which uses regular expressions
  * to authorize the call.
  */
 exports.authorize = function authorize(msg, done) {
@@ -118,7 +119,7 @@ exports.authorize = function authorize(msg, done) {
 };
 
 /**
- * Lifecycle function name for pre-processing the request.
+ * Lifecycle function for pre-processing the request.
  */
 exports.before = function before(msg, done) {
   msg.logger.debug('Callback successful', {
@@ -128,7 +129,7 @@ exports.before = function before(msg, done) {
 };
 
 /**
- * Lifecycle function name for processing the request.
+ * Lifecycle function for processing the request.
  * This call must send a response to the client.  A response can be sent using any means that
  * express supports including template engines.  If a response is not sent, solos sends a 405 to
  * the client.
@@ -142,7 +143,7 @@ exports.respond = function respond(msg, done) {
 };
 
 /**
- * Lifecycle function name for post-processing and cleanup.
+ * Lifecycle function for post-processing and cleanup.
  * This is only called if 'respond' was called.
  */
 exports.after = function after(msg, done) {

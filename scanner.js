@@ -78,7 +78,7 @@ Scanner.PARAM_NAME = ':param';
  *
  * @type String
  */
-Scanner.DEFAULT_PATH = './';
+Scanner.DEFAULT_PATH = 'solos';
 
 /**
  * Derfault URI parameter template for the scanner.
