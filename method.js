@@ -22,6 +22,7 @@ function MethodBinder(application) {
   const security = this.config.security || {};
   const groups = JSON.parse(JSON.stringify(security.groups || {}));
   Object.keys(groups).forEach((key) => {
+    groups[key] = Array.isArray(groups[key]) ? groups[key] : [groups[key]];
     groups[key] = groups[key].map(regex => new RegExp(regex));
   });
 
@@ -242,15 +243,20 @@ MethodBinder.prototype.bind = function bind(msg) {
       const roles = user.groups || [];
       let claimPermitted = false;
 
+      message.logger.debug('Authorizing User', user);
+
       for (let i = 0; i < roles.length && !claimPermitted; i += 1) {
         const regexes = THIS.groups[roles[i]] || [];
+        message.logger.debug('Regular Expressions', regexes);
 
         for (let j = 0; j < regexes.length && !claimPermitted; j += 1) {
           const regex = regexes[j];
+          message.logger.debug('Regular Expression Found', regex);
 
           if (regex) {
             const claim = `${req.method} ${req.path}`;
             claimPermitted = claim.match(regex);
+            message.logger.debug('Authorization Found', claimPermitted);
           }
         }
       }
