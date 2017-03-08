@@ -1,5 +1,5 @@
 {
-  "name": "rapid-solos",
+  "name": "solos",
   "version": "0.0.25",
   "description": "Express.js and Seneca.js based RESTful framework",
   "main": "solos.js",
