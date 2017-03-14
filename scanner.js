@@ -132,7 +132,11 @@ Scanner.prototype.scan = function scan(resourcePath) {
   const resource = new Resource(path, path, '', THIS);
 
   THIS.root = path;
-  Scanner.recursiveScan(resource);
+  if (fs.existsSync(path)) {
+    Scanner.recursiveScan(resource);
+  } else {
+    THIS.seneca.log.warn(`directory [${path}] does not exist!`);
+  }
 };
 
 /**
@@ -217,7 +221,7 @@ Scanner.prototype.isParameter = function isParameter(value) {
 
 Scanner.prototype.sendMessage = function sendMessage(msg) {
   const THIS = this;
-  this.seneca.act(msg, (err /* , unused req parameter */) => {
+  this.seneca.act(msg, (err /* , unused req parameter */ ) => {
     if (err) {
       THIS.errors.push(msg);
     }
