@@ -221,7 +221,7 @@ Scanner.prototype.isParameter = function isParameter(value) {
 
 Scanner.prototype.sendMessage = function sendMessage(msg) {
   const THIS = this;
-  this.seneca.act(msg, (err /* , unused req parameter */ ) => {
+  this.seneca.act(msg, (err) => {
     if (err) {
       THIS.errors.push(msg);
     }
