@@ -4,46 +4,46 @@
 
 'use strict';
 
-exports.request_received = function requestReceived(msg, done) {
+exports.request_received = function requestReceived(msg) {
   msg.logger.debug('Callback successful', {
     method: 'receive',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
-exports.authorize = function authorize(msg, done) {
+exports.authorize = function authorize(msg) {
   msg.logger.debug('Callback successful', {
     method: 'authorize',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
-exports.validate = function validate(msg, done) {
+exports.validate = function validate(msg) {
   msg.logger.debug('Callback successful', {
     method: 'validate',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
-exports.before = function before(msg, done) {
+exports.before = function before(msg) {
   msg.logger.debug('Callback successful', {
     method: 'before',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
-exports.respond = function respond(msg, done) {
+exports.respond = function respond(msg) {
   msg.response.send('Solos Lives!!!');
   msg.logger.debug('Callback successful', {
     method: 'respond',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
-exports.after = function after(msg, done) {
+exports.after = function after(msg) {
   msg.logger.debug('Callback successful', {
     method: 'after',
     context: msg,
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };

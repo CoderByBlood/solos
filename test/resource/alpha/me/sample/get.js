@@ -3,10 +3,9 @@
  * Copyright (c) 2015 by Three Pawns, Inc. All rights reserved.
  * 
  * The Lifecycle functions are called in the order they are defined in this file.
- * All functions are optional except 'respond(msg, done)'.
+ * All functions are optional except 'respond(msg)'.
  * If defined, the first parameter 'msg' has req, res properties which give you access to the
- * http request and http response -and- the second parameter 'done' is the callback that
- * has the standard callback(error, result) signature.
+ * http request and http response -and- es6 Promises must always be returned
  * 
  * Example Directory Structure
  * .
@@ -39,21 +38,21 @@
  * The request has been authenticated <strong>BUT NOT authorized</strong> as this point
  * in the lifecycle!
  */
-exports.request_received = function requestReceived(msg, done) {
+exports.request_received = function requestReceived(msg) {
   msg.logger.debug('Callback successful', {
     method: 'receive',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
  * Lifecycle function name for validating the user input.
  */
-exports.validate = function validate(msg, done) {
+exports.validate = function validate(msg) {
   msg.logger.debug('Callback successful', {
     method: 'validate',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
@@ -61,21 +60,21 @@ exports.validate = function validate(msg, done) {
  * Define this only if you want to override the default behavior, which uses regular expressions
  * to authorize the call.
  */
-exports.authorize = function authorize(msg, done) {
+exports.authorize = function authorize(msg) {
   msg.logger.debug('Callback successful', {
     method: 'authorize',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
  * Lifecycle function name for pre-processing the request.
  */
-exports.before = function before(msg, done) {
+exports.before = function before(msg) {
   msg.logger.debug('Callback successful', {
     method: 'before',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
@@ -84,22 +83,22 @@ exports.before = function before(msg, done) {
  * express supports including template engines.  If a response is not sent, solos sends a 405 to
  * the client.
  */
-exports.respond = function respond(msg, done) {
+exports.respond = function respond(msg) {
   msg.res.send('Solos Lives!!!');
   msg.logger.debug('Callback successful', {
     method: 'respond',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
  * Lifecycle function name for post-processing and cleanup.
  * This is only called if 'respond' was called.
  */
-exports.after = function after(msg, done) {
+exports.after = function after(msg) {
   msg.logger.debug('Callback successful', {
     method: 'after',
     context: msg,
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };

@@ -12,28 +12,28 @@
  * The callback has the standrard callback(error, result) signature.  However, only
  * the error parameter in the callback is inspected.
  */
-exports.bind = function bind(options, callback) {
-  let error;
+exports.bind = function bind(options) {
+  return new Promise((resolve, reject) => {
+    try {
+      const seneca = options.seneca;
+      const param = options.param;
 
-  try {
-    const seneca = options.seneca;
-    const param = options.param;
+      const entity = seneca.make(param);
+      entity.id = '5';
+      entity.name = 'Apple';
+      entity.price = 1.99;
 
-    const entity = seneca.make(param);
-    entity.id = '5';
-    entity.name = 'Apple';
-    entity.price = 1.99;
+      entity.save$((err, foo) => {
+        seneca.log.info(foo);
+      });
 
-    entity.save$((err, foo) => {
-      seneca.log.info(foo);
-    });
+      entity.load$(entity.id, (err, foo) => {
+        seneca.log.info(foo);
+      });
+    } catch (err) {
+      reject(err);
+    }
 
-    entity.load$(entity.id, (err, foo) => {
-      seneca.log.info(foo);
-    });
-  } catch (err) {
-    error = err;
-  }
-
-  callback(error);
+    resolve(options);
+  });
 };
