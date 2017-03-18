@@ -1,7 +1,8 @@
-# RAPID SOLOS
+# SOLOS
 
   Express.js and Seneca.js based RESTful framework that uses a directory structure to mimic a REST URI,
-  and uses filenames for HTTP methods.  All HTTP methods supported by Express are supported.
+  and uses filenames for HTTP methods.  All HTTP methods supported by Express are supported.  Solos
+  effectively turns Express.js into an extremely opinionated framework.
 
 ## Philosophy
 
@@ -76,83 +77,83 @@ const server = app.listen(3000, () => {
 ```js
 /*
  * The Lifecycle functions are called in the order they are defined below.
- * All functions are optional except 'respond(msg, done)'.
- * If the funciton is defined, the first parameter 'msg' has req, res, seneca, logger, and express
+ * All functions are optional except 'respond(msg)'.
+ * If the funciton is defined, the parameter 'msg' has req, res, seneca, logger, and express
  * properties which give you access to the http request, http response, seneca, seneca's logger, and
- * the running express instance -and- the second parameter 'done' is the callback that has the
- * standard callback(error, result) signature.
+ * the running express instance -and- the function must return an es6 Promise.
  */
 
 
 /**
- * Lifecycle function that indicates a request to execute the method has been received.
+ * Lifecycle function name that indicates a request to execute the method has been received.
  * The request has been authenticated <strong>BUT NOT authorized</strong> as this point
  * in the lifecycle!
  */
-exports.request_received = function requestReceived(msg, done) {
+exports.request_received = function requestReceived(msg) {
   msg.logger.debug('Callback successful', {
     method: 'receive',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
- * Lifecycle function for validating the user input.
+ * Lifecycle function name for validating the user input.
  */
-exports.validate = function validate(msg, done) {
+exports.validate = function validate(msg) {
   msg.logger.debug('Callback successful', {
     method: 'validate',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
- * Lifecycle function for authorizing the user to endpoint.
- * Define this ONLY if you want to OVERRIDE the default behavior, which uses regular expressions
+ * Lifecycle function name for authorizing the user to endpoint.
+ * Define this only if you want to override the default behavior, which uses regular expressions
  * to authorize the call.
  */
-exports.authorize = function authorize(msg, done) {
+exports.authorize = function authorize(msg) {
   msg.logger.debug('Callback successful', {
     method: 'authorize',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
- * Lifecycle function for pre-processing the request.
+ * Lifecycle function name for pre-processing the request.
  */
-exports.before = function before(msg, done) {
+exports.before = function before(msg) {
   msg.logger.debug('Callback successful', {
     method: 'before',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
- * Lifecycle function for processing the request.
+ * Lifecycle function name for processing the request.
  * This call must send a response to the client.  A response can be sent using any means that
  * express supports including template engines.  If a response is not sent, solos sends a 405 to
  * the client.
  */
-exports.respond = function respond(msg, done) {
+exports.respond = function respond(msg) {
   msg.res.send('Solos Lives!!!');
   msg.logger.debug('Callback successful', {
     method: 'respond',
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
 
 /**
- * Lifecycle function for post-processing and cleanup.
+ * Lifecycle function name for post-processing and cleanup.
  * This is only called if 'respond' was called.
  */
-exports.after = function after(msg, done) {
+exports.after = function after(msg) {
   msg.logger.debug('Callback successful', {
     method: 'after',
     context: msg,
   });
-  done(undefined, msg);
+  return Promise.resolve(msg);
 };
+
 ```
 ### Example entity.js (alpha-entity.js)
 ```js
@@ -162,11 +163,11 @@ exports.after = function after(msg, done) {
  *
  * Seneca can be accessed through 'options.seneca' and param can be accessed
  * through 'options.param'.
- * The callback has the standrard callback(error, result) signature.  However, only
- * the error parameter in the callback is inspected.
+ * The funtion must return an es6 Promise.
  */
-exports.bind = function bind(options, callback) {
+exports.bind = function bind(options) {
   // write any initialization code here
+  return Promise.resolve(options);
 });
 ```
 

@@ -186,9 +186,11 @@ MethodBinder.prototype.executeMethod = function executeMethod(method) {
             }
 
             if (!msg.res.headersSent || (responded && lifecycle === MethodBinder.AFTER_RESPONSE)) {
-              if (typeof method[lifecycle] === typeof Function && method[lifecycle].length > 1) {
-                method[lifecycle](msg, (error, result) => {
-                  chain[index + 1](error, result);
+              if (typeof method[lifecycle] === typeof Function && method[lifecycle].length > 0) {
+                method[lifecycle](msg).then((result) => {
+                  chain[index + 1](undefined, result);
+                }).catch((error) => {
+                  chain[index + 1](error, undefined);
                 });
               } else {
                 THIS.logger.info('EXECUTING - Missing Lifecycle', {

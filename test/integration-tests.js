@@ -450,20 +450,19 @@ describe('solos Integration Tests', () => {
       };
       const executeMethod = methodBinder.executeMethod(execMethod);
 
-      execMethod[MethodBinder.REQUEST_RECEIVED] = (msg, respond) => {
-        let error;
+      execMethod[MethodBinder.REQUEST_RECEIVED] = msg =>
+        new Promise((resolve, reject) => {
+          try {
+            msg.should.have.property('req');
+            msg.should.have.property('res');
+            // we don't want a 405 error
+            msg.res.sendStatus(200);
+          } catch (err) {
+            reject(err);
+          }
 
-        try {
-          msg.should.have.property('req');
-          msg.should.have.property('res');
-          // we don't want a 405 error
-          msg.res.sendStatus(200);
-        } catch (err) {
-          error = err;
-        }
-
-        respond(error, msg);
-      };
+          resolve(msg);
+        });
 
       executeMethod(req, res, (err) => {
         done(err);
@@ -482,17 +481,16 @@ describe('solos Integration Tests', () => {
       };
       const executeMethod = methodBinder.executeMethod(execMethod);
 
-      execMethod[MethodBinder.REQUEST_RECEIVED] = (msg, respond) => {
-        let error;
+      execMethod[MethodBinder.REQUEST_RECEIVED] = msg =>
+        new Promise((resolve, reject) => {
+          try {
+            msg.res.sendStatus(200);
+          } catch (err) {
+            reject(err);
+          }
 
-        try {
-          msg.res.sendStatus(200);
-        } catch (err) {
-          error = err;
-        }
-
-        respond(error, msg);
-      };
+          resolve(msg);
+        });
 
       executeMethod(req, res, (err) => {
         let error = err;

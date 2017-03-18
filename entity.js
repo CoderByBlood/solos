@@ -30,7 +30,7 @@ EntityBinder.REQUEST_CONTEXT = 'solos_context';
  * @param req The request
  * @param res The response
  */
-EntityBinder.prototype.prepareRequest = function prepareRequest(req /* , unused res parameter */) {
+EntityBinder.prototype.prepareRequest = function prepareRequest(req) {
   let context = req[EntityBinder.REQUEST_CONTEXT];
 
   if (!context) {
@@ -84,13 +84,10 @@ EntityBinder.prototype.bind = function bind(msg) {
     hasBindCallback: hasBind,
   });
 
-  const callback = function (err) {
-    if (err) {
-      THIS.logger.error('Entity Bind Unsccessful', err);
-      throw err;
-    } else {
-      THIS.app.param(param, THIS.loadEntity(param));
-    }
+  const throwError = function (error) {
+    const err = error || new Error('Entity Bind Unsuccessful');
+    THIS.logger.error('Entity Bind Unsuccessful', err);
+    throw err;
   };
 
   if (hasBind) {
@@ -98,9 +95,13 @@ EntityBinder.prototype.bind = function bind(msg) {
       param,
       seneca: this.seneca,
       express: this.app,
-    }, callback);
+    }).then(() => {
+      THIS.app.param(param, THIS.loadEntity(param));
+    }).catch((error) => {
+      throwError(error);
+    });
   } else {
-    callback();
+    throwError();
   }
 };
 

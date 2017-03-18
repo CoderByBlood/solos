@@ -9,9 +9,9 @@
  * @param msg
  * @param done
  */
-exports.respond = function(msg, done) {
-    msg.response.sendStatus(200);
-    done(undefined, msg);
+exports.respond = function respond(msg) {
+  msg.response.sendStatus(200);
+  return Promise.resolve(msg);
 };
 
 /**
@@ -19,7 +19,7 @@ exports.respond = function(msg, done) {
  * @param msg
  * @param done
  */
-exports.after = function(msg, done) {
-    done(undefined, msg);
-    //
+exports.after = function after(msg) {
+  return Promise.resolve(msg);
+  //
 };
