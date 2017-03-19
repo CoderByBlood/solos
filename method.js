@@ -186,14 +186,14 @@ MethodBinder.prototype.executeMethod = function executeMethod(method) {
             }
 
             if (!msg.res.headersSent || (responded && lifecycle === MethodBinder.AFTER_RESPONSE)) {
-              if (typeof method[lifecycle] === typeof Function && method[lifecycle].length > 0) {
+              if (typeof method[lifecycle] === typeof Function) {
                 method[lifecycle](msg).then((result) => {
                   chain[index + 1](undefined, result);
                 }).catch((error) => {
                   chain[index + 1](error, undefined);
                 });
               } else {
-                THIS.logger.info('EXECUTING - Missing Lifecycle', {
+                THIS.logger.debug('EXECUTING - Missing Lifecycle', {
                   method: methodName,
                   uri,
                   cycle: lifecycle,
@@ -239,7 +239,7 @@ MethodBinder.prototype.bind = function bind(msg) {
   const httpMethod = msg.httpMethod;
 
   if (!method[MethodBinder.AUTHORIZE_REQUEST]) {
-    method[MethodBinder.AUTHORIZE_REQUEST] = function authorize(message, done) {
+    method[MethodBinder.AUTHORIZE_REQUEST] = function authorize(message) {
       const req = message.req;
       const user = req.user || {};
       const roles = user.groups || [];
@@ -266,10 +266,10 @@ MethodBinder.prototype.bind = function bind(msg) {
       if (!method.isAuthorized(claimPermitted)) {
         message.res.sendStatus(403);
         message.logger.debug('Authorization Failed, sending 403', message);
-        done(new Error('403'), message);
-      } else {
-        done(undefined, message);
+        return Promise.reject(new Error('403'));
       }
+
+      return Promise.resolve(message);
     };
   }
 
@@ -289,7 +289,7 @@ MethodBinder.prototype.bind = function bind(msg) {
 
   MethodBinder.LIFECYCLE.forEach((lifecycle) => {
     if (typeof method[lifecycle] !== typeof Function) {
-      THIS.logger.warn('LOADING - Missing Lifecycle', {
+      THIS.logger.info('LOADING - Missing Lifecycle', {
         method: httpMethod,
         uri,
         cycle: lifecycle,

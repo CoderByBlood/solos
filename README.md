@@ -51,7 +51,7 @@ const config = require('./config.json'); // load your configuraiton
 */
 
 const express = require('express');
-const solos = require('rapid-solos');
+const solos = require('solos');
 
 const app = express();
 const router = express.Router();
