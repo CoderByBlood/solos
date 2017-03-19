@@ -1,6 +1,6 @@
 {
   "name": "solos",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Express.js and Seneca.js based RESTful framework",
   "main": "solos.js",
   "author": "Brilliancy Software a Three Pawns, Inc. Company",
