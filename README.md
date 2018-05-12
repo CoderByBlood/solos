@@ -191,7 +191,7 @@ $ npm install rapid-solos
   To view an example, clone the solos repo and install the dependencies:
 
 ```bash
-$ git clone git://github.com/BrilliancySoftware/solos.git --depth 1
+$ git clone git://github.com/CoderByBlood/solos.git --depth 1
 $ cd solos
 $ npm install
 ```
@@ -213,9 +213,9 @@ $ npm test
 
 ## People
 
-[List of all contributors](https://github.com/BrilliancySoftware/solos/graphs/contributors)
+[List of all contributors](https://github.com/CoderByBlood/solos/graphs/contributors)
 
 ## License
 
-  Copyright (c) 2016 Three Pawns, Inc;
+  Copyright (c) 2016 Coder by Blood, Inc;
   Licensed under [MIT](LICENSE)

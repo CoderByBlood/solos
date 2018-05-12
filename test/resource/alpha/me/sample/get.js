@@ -1,6 +1,6 @@
 /* eslint-disable no-trailing-spaces, no-irregular-whitespace */
 /**
- * Copyright (c) 2015 by Three Pawns, Inc. All rights reserved.
+ * Copyright (c) 2015 by Coder by Blood, Inc. All rights reserved.
  * 
  * The Lifecycle functions are called in the order they are defined in this file.
  * All functions are optional except 'respond(msg)'.
