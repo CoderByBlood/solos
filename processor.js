@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, Three Pawns, Inc. All rights reserved.
+ * Copyright (c) 2016, Coder by Blood, Inc. All rights reserved.
  */
 
 'use strict';
