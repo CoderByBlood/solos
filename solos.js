@@ -4,11 +4,27 @@
 
 'use strict';
 
-const scanner = require('./scanner');
-const entityBinder = require('./entity');
-const methodBinder = require('./method');
-const assembler = require('./assembler');
-const processor = require('./processor');
+const deified = require('deified');
+const defaultConfig = {
+  methods: {
+    directory: '.',
+    scan: {
+      filter: {},
+      glob: {
+        globs: ['**/delete.js', '**/get.js', '**/head.js', '**/post.js', '**/put.js'],
+      }
+    },
+  },
+  entities: {
+    directory: '.',
+    scan: {
+      filter: {},
+      glob: {
+        globs: ['**/*.entity.js'],
+      }
+    },
+  }
+};
 
 /**
  * @module solos
@@ -31,28 +47,12 @@ const processor = require('./processor');
  * @param seneca Seneca instance to use for message passing
  * @param config JSON configuration for solos
  */
-exports.init = function init(router, seneca, config) {
-  router.config = config;
-  seneca.use(assembler, config);
-  seneca.use(processor, config);
-  seneca.use(scanner, config);
-  seneca.use(entityBinder, {
-    app: router,
-  });
-  seneca.use(methodBinder, {
-    app: router,
-  });
-  seneca.act({
-    role: 'solos',
-    cmd: 'assemble',
-  });
+exports.init = function init(app, config) {
+  const conf = Object.assign({}, defaultConfig, config);
+  //scan for solos methods
+  const deify = deified.configure(conf.methods);
+  const methods = deify({ directory: conf.methods.directory || process.cwd() })
+  //creates services for the methods
+  //create hooks for entity loading
+  //create hooks for method lifecycle
 };
-
-
-exports.REQUEST_RECEIVED = methodBinder.MethodBinder.REQUEST_RECEIVED;
-exports.VALIDATE_REQUEST = methodBinder.MethodBinder.VALIDATE_REQUEST;
-exports.AUTHORIZE_REQUEST = methodBinder.MethodBinder.AUTHORIZE_REQUEST;
-exports.BEFORE_RESPONSE = methodBinder.MethodBinder.BEFORE_RESPONSE;
-exports.RESPOND = methodBinder.MethodBinder.RESPOND;
-exports.AFTER_RESPONSE = methodBinder.MethodBinder.AFTER_RESPONSE;
-exports.REQUEST_CONTEXT = entityBinder.EntityBinder.REQUEST_CONTEXT;
