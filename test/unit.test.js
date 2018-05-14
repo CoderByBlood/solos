@@ -7,8 +7,9 @@
 
 'use strict';
 
-describe.skip('Methods should...', () => {
+describe('Methods should...', () => {
   test('scan directories looking for matching method files', () => {
     expect.assertions(0);
+    require('../solos');
   });
 });
