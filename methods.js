@@ -8,7 +8,7 @@ const mm = require('micromatch');
 const me = /([/]([^/]+)[/])me([/])/g;
 const route = '$1:$2Id$3';
 
-const implentation = {
+const impl = {
   async remove(id, params) {
     return await this.respond({ id, params });
   },
@@ -52,8 +52,10 @@ const toPath = function(file, base) {
 };
 
 module.exports = {
-  process: function(files, importer, config) {
+  process: function(files, config, toModule, toURI) {
     const conf = Object.assign({}, defaultBindingConfig, config);
+    const importer = toModule || require;
+    const uri = toURI || toPath;
     const services = [];
 
     Object.entries(conf).forEach(([method, bindings]) => {
@@ -62,8 +64,10 @@ module.exports = {
       (Array.isArray(bindings) ? bindings : [bindings]).forEach(binding => {
         mm(files, binding.globs).forEach(file => {
           const solos = importer(file);
-          const service = implentation[binding.service].bind(solos);
-          const path = toPath(file, files.base || process.cwd());
+          const path = uri(file, files.base || process.cwd());
+          const service = {};
+
+          service[binding.service] = impl[binding.service].bind(solos);
           services.push({ path, service, solos });
         });
       });
