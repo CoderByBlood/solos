@@ -52,7 +52,7 @@ const toPath = function(file, base) {
 };
 
 module.exports = {
-  process: function(files, config, toModule, toURI) {
+  process(files, config, toModule, toURI) {
     const conf = Object.assign({}, defaultBindingConfig, config);
     const importer = toModule || require;
     const uri = toURI || toPath;
@@ -76,7 +76,7 @@ module.exports = {
     return services;
   },
 
-  deify: async function(deified, directory, config) {
+  async deify(deified, directory, config) {
     const conf = Object.assign({}, defaultDeifiedconfig, config);
     const deify = deified.configure(conf);
     return await deify({ directory });
