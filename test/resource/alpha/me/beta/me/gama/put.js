@@ -4,46 +4,44 @@
 
 'use strict';
 
-exports.request_received = function requestReceived(msg) {
-  msg.logger.debug('Callback successful', {
+exports.receive = async function receive(context) {
+  context.log.debug('Callback successful', {
     method: 'receive',
   });
-  return Promise.resolve(msg);
+  return context;
 };
 
-exports.authorize = function authorize(msg) {
-  msg.logger.debug('Callback successful', {
-    method: 'authorize',
-  });
-  return Promise.resolve(msg);
-};
-
-exports.validate = function validate(msg) {
-  msg.logger.debug('Callback successful', {
+exports.validate = async function validate(context) {
+  context.log.debug('Callback successful', {
     method: 'validate',
   });
-  return Promise.resolve(msg);
+  return context;
 };
 
-exports.before = function before(msg) {
-  msg.logger.debug('Callback successful', {
+exports.authorize = async function authorize(context) {
+  context.log.debug('Callback successful', {
+    method: 'authorize',
+  });
+  return context;
+};
+
+exports.before = async function before(context) {
+  context.log.debug('Callback successful', {
     method: 'before',
   });
-  return Promise.resolve(msg);
+  return context;
 };
 
-exports.respond = function respond(msg) {
-  msg.response.send('Solos Lives!!!');
-  msg.logger.debug('Callback successful', {
+exports.respond = async function respond(context) {
+  context.log.debug('Callback successful', {
     method: 'respond',
   });
-  return Promise.resolve(msg);
+  return { message: 'Solos Lives!!!' };
 };
 
-exports.after = function after(msg) {
-  msg.logger.debug('Callback successful', {
+exports.after = async function after(context) {
+  context.log.debug('Callback successful', {
     method: 'after',
-    context: msg,
   });
-  return Promise.resolve(msg);
+  return context;
 };

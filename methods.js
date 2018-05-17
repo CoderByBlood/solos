@@ -7,25 +7,43 @@
 const mm = require('micromatch');
 const me = /([/]([^/]+)[/])me([/])/g;
 const route = '$1:$2Id$3';
+const d = require('debug');
+const ns = 'solos:methods:';
+const log = {
+  debug: {
+    process: d(ns + 'process'),
+    deify: d(ns + 'deify'),
+    toPath: d(ns + 'deify'),
+  },
+  trace: {
+    process: d(ns + 'process:trace'),
+    deify: d(ns + 'deify:trace'),
+    toPath: d(ns + 'deify:trace'),
+  },
+  respond: {
+    debug: d('solos:respond'),
+    trace: d('solos:respond:trace'),
+  },
+};
 
 const impl = {
   async remove(id, params) {
-    return await this.respond({ id, params });
+    return await this.respond({ id, params, log: log.respond });
   },
   async get(id, params) {
-    return await this.respond({ id, params });
+    return await this.respond({ id, params, log: log.respond });
   },
   async find(params) {
-    return await this.respond({ params });
+    return await this.respond({ params, log: log.respond });
   },
   async patch(id, data, params) {
-    return await this.respond({ id, data, params });
+    return await this.respond({ id, data, params, log: log.respond });
   },
   async create(data, params) {
-    return await this.respond({ data, params });
+    return await this.respond({ data, params, log: log.respond });
   },
   async update(id, data, params) {
-    return await this.respond({ id, data, params });
+    return await this.respond({ id, data, params, log: log.respond });
   },
 };
 
@@ -48,11 +66,13 @@ const defaultBindingConfig = {
 
 const toPath = function(file, base) {
   //two regex passes are required because regexes do not match replaced content
+  log.trace.toPath({ args: { file, base } }, 'enter');
   return file.replace(base, '').replace(me, route).replace(me, route);
 };
 
 module.exports = {
   process(files, config, toModule, toURI) {
+    log.trace.process({ args: { files, config, toModule, toURI } }, 'enter');
     const conf = Object.assign({}, defaultBindingConfig, config);
     const importer = toModule || require;
     const uri = toURI || toPath;
@@ -68,7 +88,9 @@ module.exports = {
           const service = {};
 
           service[binding.service] = impl[binding.service].bind(solos);
-          services.push({ path, service, solos });
+          const endpoint = { path, service, solos };
+          log.debug.process(endpoint);
+          services.push(endpoint);
         });
       });
     });
@@ -77,6 +99,7 @@ module.exports = {
   },
 
   async deify(deified, directory, config) {
+    log.trace.deify({ args: { deified, directory, config } }, 'enter');
     const conf = Object.assign({}, defaultDeifiedconfig, config);
     const deify = deified.configure(conf);
     return await deify({ directory });

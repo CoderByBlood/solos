@@ -1,12 +1,12 @@
 /* eslint-disable no-trailing-spaces, no-irregular-whitespace */
 /**
  * Copyright (c) 2015 by Coder by Blood, Inc. All rights reserved.
- * 
+ *
  * The Lifecycle functions are called in the order they are defined in this file.
- * All functions are optional except 'respond(msg)'.
- * If defined, the first parameter 'msg' has req, res properties which give you access to the
+ * All functions are optional except 'respond(context)'.
+ * If defined, the first parameter 'context' has req, res properties which give you access to the
  * http request and http response -and- es6 Promises must always be returned
- * 
+ *
  * Example Directory Structure
  * .
  * ├── solos  <-- configurable root directory - see config
@@ -38,21 +38,21 @@
  * The request has been authenticated <strong>BUT NOT authorized</strong> as this point
  * in the lifecycle!
  */
-exports.request_received = function requestReceived(msg) {
-  msg.logger.debug('Callback successful', {
+exports.receive = async function receive(context) {
+  context.log.debug('Callback successful', {
     method: 'receive',
   });
-  return Promise.resolve(msg);
+  return context;
 };
 
 /**
  * Lifecycle function name for validating the user input.
  */
-exports.validate = function validate(msg) {
-  msg.logger.debug('Callback successful', {
+exports.validate = async function validate(context) {
+  context.log.debug('Callback successful', {
     method: 'validate',
   });
-  return Promise.resolve(msg);
+  return context;
 };
 
 /**
@@ -60,21 +60,21 @@ exports.validate = function validate(msg) {
  * Define this only if you want to override the default behavior, which uses regular expressions
  * to authorize the call.
  */
-exports.authorize = function authorize(msg) {
-  msg.logger.debug('Callback successful', {
+exports.authorize = async function authorize(context) {
+  context.log.debug('Callback successful', {
     method: 'authorize',
   });
-  return Promise.resolve(msg);
+  return context;
 };
 
 /**
  * Lifecycle function name for pre-processing the request.
  */
-exports.before = function before(msg) {
-  msg.logger.debug('Callback successful', {
+exports.before = async function before(context) {
+  context.log.debug('Callback successful', {
     method: 'before',
   });
-  return Promise.resolve(msg);
+  return context;
 };
 
 /**
@@ -83,22 +83,20 @@ exports.before = function before(msg) {
  * express supports including template engines.  If a response is not sent, solos sends a 405 to
  * the client.
  */
-exports.respond = function respond(msg) {
-  msg.res.send('Solos Lives!!!');
-  msg.logger.debug('Callback successful', {
+exports.respond = async function respond(context) {
+  context.log.debug('Callback successful', {
     method: 'respond',
   });
-  return Promise.resolve(msg);
+  return {message: 'Solos Lives!!!'};
 };
 
 /**
  * Lifecycle function name for post-processing and cleanup.
  * This is only called if 'respond' was called.
  */
-exports.after = function after(msg) {
-  msg.logger.debug('Callback successful', {
+exports.after = async function after(context) {
+  context.log.debug('Callback successful', {
     method: 'after',
-    context: msg,
   });
-  return Promise.resolve(msg);
+  return context;
 };

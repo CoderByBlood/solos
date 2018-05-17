@@ -6,6 +6,17 @@
 
 const deified = require('deified');
 const methods = require('./methods');
+const d = require('debug');
+const ns = 'solos:';
+const logs = {};
+const log = {
+  debug: {
+    init: d(ns + 'init'),
+  },
+  trace: {
+    init: d(ns + 'init:trace'),
+  },
+};
 
 const defaultConfig = {
   directory: process.cwd(),
@@ -39,10 +50,19 @@ module.exports = {
    * @param seneca Seneca instance to use for message passing
    * @param config JSON configuration for solos
    */
-  async init(app, config) {
+  async init(app, config, toModule, toURI) {
+    log.trace.init({ args: { app, config, toModule, toURI } }, 'enter');
     const conf = Object.assign({}, defaultConfig, config);
     const files = await methods.deify(deified, conf.directory, conf.deified);
-    const endpoints = methods.process(files, conf.methods);
+    const endpoints = methods.process(files, conf.methods, toModule, toURI);
+
+    //setup logs
+    (conf.hooks.before.concat(conf.hooks.after)).forEach(hook => {
+      logs[hook] = {
+        debug: d(ns + 'hook:' + hook),
+        trace: d(ns + 'hook:' + hook + ':trace')
+      };
+    });
 
     endpoints.forEach(endpoint => {
       app.use(endpoint.path, endpoint.service);
@@ -52,6 +72,7 @@ module.exports = {
             return async context => {
               const callback = endpoint.solos[hook];
               if (callback && typeof callback === 'function') {
+                context.log = logs[hook];
                 return await callback(context);
               }
 
@@ -64,6 +85,7 @@ module.exports = {
             return async context => {
               const callback = endpoint.solos[hook];
               if (callback && typeof callback === 'function') {
+                context.log = logs[hook];
                 return await callback(context);
               }
 

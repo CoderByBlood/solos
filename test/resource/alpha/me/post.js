@@ -4,22 +4,10 @@
 
 'use strict';
 
-/**
- *
- * @param msg
- * @param done
- */
-exports.respond = function respond(msg) {
-  msg.response.sendStatus(200);
-  return Promise.resolve(msg);
+exports.respond = async function respond(context) {
+  return { message: 'Solos Lives!!!' };
 };
 
-/**
- *
- * @param msg
- * @param done
- */
-exports.after = function after(msg) {
-  return Promise.resolve(msg);
-  //
+exports.after = async function after(context) {
+  return context;
 };
