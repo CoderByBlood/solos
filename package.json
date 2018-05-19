@@ -2,15 +2,15 @@
   "name": "solos",
   "version": "0.2.0",
   "description": "Express.js and Seneca.js based RESTful framework",
-  "main": "solos.js",
+  "main": "main.js",
   "author": "Coder by Blood, Inc.",
   "license": "MIT",
   "homepage": "https://github.com/CoderByBlood/solos",
   "dependencies": {
+    "@feathersjs/express": "^1.2.2",
     "@feathersjs/feathers": "^3.1.5",
     "debug": "^3.1.0",
     "deified": "^0.3.0",
-    "express": "^4.13.3",
     "micromatch": "^3.1.10",
     "uuid": "^2.0.1"
   },

@@ -11,10 +11,10 @@ const ns = 'solos:';
 const logs = {};
 const log = {
   debug: {
-    init: d(ns + 'init'),
+    init: d(`${ns}init`),
   },
   trace: {
-    init: d(ns + 'init:trace'),
+    init: d(`${ns}init:trace`),
   },
 };
 
@@ -28,23 +28,19 @@ const defaultConfig = {
   },
 };
 
+const calls = ['remove', 'get', 'find', 'patch', 'create', 'update'];
+
 module.exports = {
   /**
    * @module solos
    * @description Pass this method in to the Express app use binding with the solos
    * configuration data.
    *
-   *  <dl>
-   *      <dt>The required configuration items for solos are:</dt>
-   *      <dd>
-   *          <li></li>
-   *      </dd>
+   * ##### The required configuration for solos is: #####
+   * 1. ddd
    *
-   *      <dt>The optional configuration items for solos are:</dt>
-   *      <dd>
-   *          <li></li>
-   *      </dd>
-   *  </dl>
+   * ##### The optional configuration for solos is: #####
+   * 1. ddd
    *
    * @param router Express's Router to bind solos
    * @param seneca Seneca instance to use for message passing
@@ -55,25 +51,58 @@ module.exports = {
     const conf = Object.assign({}, defaultConfig, config);
     const files = await methods.deify(deified, conf.directory, conf.deified);
     const endpoints = methods.process(files, conf.methods, toModule, toURI);
+    const beforecalls = [];
+    const aftercalls = [];
 
-    //setup logs
-    (conf.hooks.before.concat(conf.hooks.after)).forEach(hook => {
+    conf.hooks.before.forEach(hook => {
+      beforecalls.push(hook);
       logs[hook] = {
-        debug: d(ns + 'hook:' + hook),
-        trace: d(ns + 'hook:' + hook + ':trace')
+        debug: d(`${ns}hook:${hook}`),
+        trace: d(`${ns}hook:${hook}:trace`)
       };
+
+      calls.forEach(call => {
+        const beforecall = `${hook}_${call}`;
+        beforecalls.push(beforecall);
+        logs[beforecall] = {
+          debug: d(`${ns}hook:${beforecall}`),
+          trace: d(`${ns}hook:${beforecall}:trace`)
+        };
+      });
+    });
+
+    conf.hooks.after.forEach(hook => {
+      aftercalls.push(hook);
+      logs[hook] = {
+        debug: d(`${ns}hook:${hook}`),
+        trace: d(`${ns}hook:${hook}:trace`)
+      };
+
+      calls.forEach(call => {
+        const aftercall = `${hook}_${call}`;
+        aftercalls.push(aftercall);
+        logs[aftercall] = {
+          debug: d(`${ns}hook:${aftercall}`),
+          trace: d(`${ns}hook:${aftercall}:trace`)
+        };
+      });
     });
 
     endpoints.forEach(endpoint => {
-      app.use(endpoint.path, endpoint.service);
+      const end = /[_]([^_]+$)/;
+
+      app.use(endpoint.path, endpoint.solos);
       app.service(endpoint.path).hooks({
         before: {
-          all: conf.hooks.before.map(hook => {
+          all: beforecalls.map(hook => {
             return async context => {
               const callback = endpoint.solos[hook];
               if (callback && typeof callback === 'function') {
                 context.log = logs[hook];
-                return await callback(context);
+                const method = hook.match(end);
+                if (!method || method[1] === context.method) {
+                  return callback(context);
+                }
               }
 
               return context;
@@ -81,12 +110,16 @@ module.exports = {
           }),
         },
         after: {
-          all: conf.hooks.after.map(hook => {
+          all: aftercalls.map(hook => {
             return async context => {
               const callback = endpoint.solos[hook];
               if (callback && typeof callback === 'function') {
                 context.log = logs[hook];
-                return await callback(context);
+                const method = hook.match(end);
+
+                if (!method || method[1] === context.method) {
+                  return callback(context);
+                }
               }
 
               return context;

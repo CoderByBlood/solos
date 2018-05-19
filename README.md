@@ -155,27 +155,11 @@ exports.after = function after(msg) {
 };
 
 ```
-### Example entity.js (alpha-entity.js)
-```js
-/**
- * This is called as the parameter is bound into express at load time.
- * 'seneca.make(param).load$(id, (err, found) => { ... });' is called by solos at runtime.
- *
- * Seneca can be accessed through 'options.seneca' and param can be accessed
- * through 'options.param'.
- * The funtion must return an es6 Promise.
- */
-exports.bind = function bind(options) {
-  // write any initialization code here
-  return Promise.resolve(options);
-});
-```
 
 ## Installation
 
 ```bash
-$ npm install seneca
-$ npm install rapid-solos
+$ npm install solos
 ```
 
 ## Features

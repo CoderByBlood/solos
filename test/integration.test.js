@@ -9,123 +9,89 @@
 
 
 const feathers = require('@feathersjs/feathers');
-const solos = require('../solos');
+const solos = require('../main');
 const app = feathers();
+const callbacks = ['receive', 'validate', 'authorize', 'before', 'after'];
+const calls = ['remove', 'get', 'find', 'patch', 'create', 'update'];
+const params = {
+  remove: [1],
+  get: [2],
+  find: [{}],
+  patch: [3, {}, {}],
+  create: [{}, {}],
+  update: [4, {}, {}],
+};
 
 
 describe('Solos should...', () => {
-
-  test('execute services with hooks and valid callbacks', async() => {
-    const callbacks = ['receive', 'validate', 'authorize', 'before', 'respond', 'after', ];
-    const mock = {};
-    callbacks.forEach(callback => {
-      mock[callback] = jest.fn(x => x);
-    });
-
-    expect.assertions(callbacks.length);
-    await solos.init(app, undefined, x => mock);
-
-    const services = app.services;
-    const keys = Object.keys(services);
-
-    await Promise.all(Object.entries(services).map(async([path, service]) => {
-      if (service['remove']) {
-        await service['remove'](1);
-      }
-      else if (service['get']) {
-        await service['get'](2);
-      }
-      else if (service['find']) {
-        await service['find']({});
-      }
-      else if (service['patch']) {
-        await service['patch'](3, {}, {});
-      }
-      else if (service['update']) {
-        await service['update'](4, {}, {});
-      }
-      else if (service['create']) {
-        await service['create']({}, {});
-      }
-    }));
-
-    callbacks.forEach(callback => {
-      expect(mock[callback].mock.calls.length).toBe(keys.length);
-    });
-  });
-
-  test('execute services with hooks and invalid callbacks', async() => {
-    const callbacks = ['receive', 'validate', 'authorize', 'before', 'respond', 'after', ];
-    const mock = {};
-    callbacks.forEach(callback => {
-      if (callback === 'before' || callback === 'after') {
-        mock[callback] = ' ';
-      }
-      else {
-        mock[callback] = jest.fn(x => x);
-      }
-    });
-
-    expect.assertions(callbacks.length - 2);
-    await solos.init(app, undefined, x => mock);
-
-    const services = app.services;
-    const keys = Object.keys(services);
-
-    await Promise.all(Object.entries(services).map(async([path, service]) => {
-      if (service['remove']) {
-        await service['remove'](1);
-      }
-      else if (service['get']) {
-        await service['get'](2);
-      }
-      else if (service['find']) {
-        await service['find']({});
-      }
-      else if (service['patch']) {
-        await service['patch'](3, {}, {});
-      }
-      else if (service['update']) {
-        await service['update'](4, {}, {});
-      }
-      else if (service['create']) {
-        await service['create']({}, {});
-      }
-    }));
-
-    callbacks.forEach(callback => {
-      if (mock[callback] !== ' ') {
-        expect(mock[callback].mock.calls.length).toBe(keys.length);
-      }
-    });
-  });
-
-  test('execute services with hooks and invalid callbacks', async() => {
+  test('scan for method files and configure services with defaults', async() => {
+    const app = feathers();
+    const bindings = { remove: 0, get: 0, find: 0, patch: 0, create: 0, update: 0 };
 
     await solos.init(app);
 
+    expect.assertions(Object.keys(bindings) + Object.keys(app.services).length);
+
+    Object.entries(app.services).forEach(([path, service]) => {
+      expect(path).toEqual(expect.stringMatching(/[^/]$/));
+      Object.keys(bindings).forEach(binding => {
+        if (service[binding]) {
+          bindings[binding]++;
+        }
+      });
+    });
+
+    Object.entries(bindings).forEach(([binding, count]) => {
+      expect(count).toBeGreaterThan(0);
+    });
+  });
+
+  test('execute services with hooks and callbacks', async() => {
+    const mock = {};
+    callbacks.forEach(callback => {
+      mock[callback] = jest.fn(x => x);
+
+      calls.forEach(call => {
+        mock[`${callback}_${call}`] = jest.fn(x => x);
+      });
+    });
+
+    calls.forEach(call => {
+      mock[call] = jest.fn(x => x);
+    });
+
+    await solos.init(app, undefined, x => Object.assign({}, mock));
+
     const services = app.services;
+    const keys = Object.keys(services);
+
+    expect.assertions(calls.length * keys.length);
+
+    await Promise.all(Object.entries(services).map(async([path, service]) => {
+      await Promise.all(calls.map(async call => {
+        if (service[call]) {
+          const p = params[call];
+          await service[call](...p);
+          expect(mock[call]).toHaveBeenCalledTimes(keys.length);
+        }
+      }));
+    }));
+  });
+
+  test('execute services with implementations hooks', async() => {
+    await solos.init(app);
+
+    const services = app.services;
+
     expect.assertions(Object.keys(services).length);
 
     await Promise.all(Object.entries(services).map(async([path, service]) => {
-      if (service['remove']) {
-        expect(await service['remove'](1)).toHaveProperty('message', 'Solos Lives!!!');
-      }
-      else if (service['get']) {
-        expect(await service['get'](2)).toHaveProperty('message', 'Solos Lives!!!');
-      }
-      else if (service['find']) {
-        expect(await service['find']({})).toHaveProperty('message', 'Solos Lives!!!');
-      }
-      else if (service['patch']) {
-        expect(await service['patch'](3, {}, {})).toHaveProperty('message', 'Solos Lives!!!');
-      }
-      else if (service['update']) {
-        expect(await service['update'](4, {}, {})).toHaveProperty('message', 'Solos Lives!!!');
-      }
-      else if (service['create']) {
-        expect(await service['create']({}, {})).toHaveProperty('message', 'Solos Lives!!!');
-      }
+      await Promise.all(calls.map(async call => {
+        if (service[call]) {
+          const p = params[call];
+          expect(await service[call](...p)).toHaveProperty('message', 'Solos Lives!!!');
+        }
+      }));
     }));
   });
 });

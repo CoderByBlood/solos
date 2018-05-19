@@ -4,29 +4,35 @@
 
 'use strict';
 
-const express = require('express');
-const config = require('../config.json');
-const solos = require('../solos.js');
+const express = require('@feathersjs/express');
+const feathers = require('@feathersjs/feathers');
+const solos = require('../main');
+const services = feathers();
 
-const app = express();
-const router = express.Router();
-const seneca = require('seneca')(config);
+// This creates an app that is both, an Express and Feathers app
+const app = express(services);
 
-
-app.use('/', router);
-seneca.use('entity');
+// Turn on JSON body parsing for REST services
+app.use(express.json());
+// Turn on URL-encoded body parsing for REST services
+app.use(express.urlencoded({ extended: true }));
+// Set up REST transport using Express
+app.configure(express.rest());
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-solos.init(router, seneca, config);
+Promise.resolve(solos.init(app)).then(() => {
+  // Set up an error handler that gives us nicer errors
+  app.use(express.errorHandler());
 
-const server = app.listen(3000, () => {
-  const host = server.address().address;
-  const port = server.address().port;
+  const server = app.listen(8080, () => {
+    const host = server.address().address;
+    const port = server.address().port;
 
-  /* eslint-disable no-console */
-  console.log('Example app listening at http://%s:%s', host === '::' ? 'localhost' : host, port);
-  /* eslint-enable */
+    /* eslint-disable no-console */
+    console.log('Example app listening at http://%s:%s', host === '::' ? 'localhost' : host, port);
+    /* eslint-enable */
+  });
 });
