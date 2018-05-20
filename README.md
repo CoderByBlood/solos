@@ -235,11 +235,10 @@ exports.after_find = async function after_find(context) {
 
   Solos configuration opject for `solos.init(app, config)` can have
   the following properties:
-  - `directory: '...')` - the full path to the directory to scan
+  - `directory: '...'` - the full path to the directory to scan
     for solos files, defaults to current working directory
-  - `deified: {...}` - the configuration passed to deified module - see
-    its docs:
-    - `glob: {globs: ['**`&#8205;`/*.solos.js'], }` the default is all solos.js
+  - `deified: {...}` - the configuration passed to deified module, see its docs:
+    - `glob: {globs: ['**/*.solos.js'], }` the default is all solos.js
        files in subdirectories
   - `hooks:{...}` has two properties `before` and `after`
     - `before: ['receive', 'validate', 'authorize', 'before', ]` the
