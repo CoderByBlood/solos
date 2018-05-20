@@ -18,7 +18,8 @@
     "includePattern": ".+\\.js(doc)?$",
     "excludePattern": "(^|\\/|\\\\)_"
   },
-  "plugins": [],
+  "plugins": ["plugins/markdown"],
+  "markdown": { "tags": ["default"] },
   "templates": {
     "cleverLinks": false,
     "monospaceLinks": false
