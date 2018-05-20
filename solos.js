@@ -138,6 +138,7 @@ module.exports = {
     log.debug.init({ conf });
 
     const files = await services.deify(deified, conf.directory, conf.deified);
+    files.base = conf.directory;
     log.debug.init({ files });
 
     const endpoints = services.process(files, conf.services, toModule, toURI);

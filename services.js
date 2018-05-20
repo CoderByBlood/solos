@@ -85,6 +85,8 @@ module.exports = {
    * 1. NONE
    *
    * @param {array} files **required** Full paths to files holding solos services
+   * if files.base is set, it is passed to `toPath(...)` otherwise default to
+   * current working directory
    * @param {object} config **optional** The configuration
    * @param {function} toModule **optional** `function(path)` that returns a
    * service - defaults to `require`

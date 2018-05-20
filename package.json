@@ -2,7 +2,7 @@
   "name": "solos",
   "version": "0.2.0",
   "description": "Express.js and Seneca.js based RESTful framework",
-  "main": "main.js",
+  "main": "solos.js",
   "author": "Coder by Blood, Inc.",
   "license": "MIT",
   "homepage": "https://github.com/CoderByBlood/solos",
@@ -10,9 +10,7 @@
     "@feathersjs/express": "^1.2.2",
     "@feathersjs/feathers": "^3.1.5",
     "debug": "^3.1.0",
-    "deified": "^0.3.1",
-    "micromatch": "^3.1.10",
-    "uuid": "^2.0.1"
+    "deified": "^0.3.1"
   },
   "devDependencies": {
     "coveralls": "^3.0.1",
@@ -21,7 +19,7 @@
     "eslint-plugin-import": "^2.12.0",
     "jest": "^22.4.4",
     "jsdoc": "^3.3.2",
-    "node-mocks-http": "^1.7.0"
+    "supertest": "^3.1.0"
   },
   "scripts": {
     "start": "node test/express.js",
