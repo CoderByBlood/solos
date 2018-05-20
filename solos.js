@@ -27,7 +27,7 @@ const log = {
 };
 
 /**
- * The default configuration for the process function
+ * The default configuration for the init function
  * 1. `directory: process.cwd()` - the full path to the directory to scan
  *    for solos files, defaults to current working directory
  * 2. `deified: {...}` - the configuration passed to deified module - see

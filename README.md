@@ -23,8 +23,6 @@
 │   │       └── delta.solos.js  <-- (DELETE...PUT) http://domain.com/api/alpha/:alphaId/delta
 ```
 
-  **solos.js files can be placed anywhere except directly inside a 'me' folder**
-
 ## Setup
 
 ```js
@@ -32,6 +30,7 @@ const express = require('@feathersjs/express');
 const feathers = require('@feathersjs/feathers');
 const solos = require('solos');
 const services = feathers();
+const config = {};
 
 // This creates an app that is both, an Express and Feathers app
 const app = express(services);
@@ -47,7 +46,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-Promise.resolve(solos.init(app)).then(() => {
+Promise.resolve(solos.init(app, config)).then(() => {
   // Set up an error handler that gives us nicer errors
   app.use(express.errorHandler());
 
@@ -107,7 +106,7 @@ Promise.resolve(solos.init(app)).then(() => {
   The mapping between HTTP Methods and service methods are defined by Featherjs
   (see [REST documentation](https://docs.feathersjs.com/guides/basics/rest.html)).
 
-### Example solos service (solos.js)
+### Example solos service (endpoint.solos.js)
 ```js
 'use strict';
 
@@ -232,6 +231,21 @@ exports.after_find = async function after_find(context) {
   return context;
 };
 ```
+## Configuration ##
+
+  Solos configuration opject for `solos.init(app, config)` can have
+  the following properties:
+  - `directory: '...')` - the full path to the directory to scan
+    for solos files, defaults to current working directory
+  - `deified: {...}` - the configuration passed to deified module - see
+    its docs:
+    - `glob: {globs: ['**`&#8205;`/*.solos.js'], }` the default is all solos.js
+       files in subdirectories
+  - `hooks:{...}` has two properties `before` and `after`
+    - `before: ['receive', 'validate', 'authorize', 'before', ]` the
+       callback **before** hooks, in the order called
+    - `after: ['after', ]` the callback **after** hooks, in the
+       order called
 
 ## Installation
 
