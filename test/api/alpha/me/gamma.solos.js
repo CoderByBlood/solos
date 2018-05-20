@@ -4,45 +4,47 @@
  *
  * Functions are called in the following order:
  * 1. receive(context)
- * 2. receive_{service method name}(context)
+ * 2. receive_[remove|get|find|patch|create|update](context)
  * 3. validate(context)
- * 4. validate_{serivce method name}(context)
+ * 4. validate_[remove|get|find|patch|create|update](context)
  * 5. authorize(context)
- * 6. authorize_{serivce method name}(context)
+ * 6. authorize_[remove|get|find|patch|create|update](context)
  * 7. before(context)
- * 8. before_{serivce method name}(context)
- * 9. {serivce method name}(...)
+ * 8. before_[remove|get|find|patch|create|update](context)
+ * 9. [remove|get|find|patch|create|update](...)
  * 10. after(context)
- * 11. after_{serivce method name}(context)
+ * 11. after_[remove|get|find|patch|create|update](context)
  *
  * If the parameter is 'context', then it has properties documented by feathersjs:
- * see [link](https://docs.feathersjs.com/api/hooks.html)
+ * see [Hook documentation](https://docs.feathersjs.com/api/hooks.html).  The
+ * context parameter has an addtional `log` property.  `log.debug()` for general
+ * debugging and `log.trace()` for detailed tracing - both are from the debug
+ * module.
  *
- * Module must export at least one service method as defined by feathersjs:
- * see [link](https://docs.feathersjs.com/api/services.html)
+ * The module must export at least one service method as defined by feathersjs:
+ * see [Service documentation](https://docs.feathersjs.com/api/services.html).
  *
  * The mapping between HTTP Methods and services methods are defined by featherjs:
- * see [link](https://docs.feathersjs.com/guides/basics/rest.html)
+ * see [REST documentation](https://docs.feathersjs.com/guides/basics/rest.html).
  *
  * Example Directory Structure
  * .
  * ├── api  <-- configurable root directory - see config
- * │   ├── solos.js  <-- (DELETE|GET|PATCH|POST|PUT) http://domain.com/
+ * │   ├── alpha.solos.js  <-- (DELETE|GET|PATCH|POST|PUT) http://domain.com/api/alpha
  * │   ├── alpha
- * │   │   ├── solos.js  <-- (DELETE...PUT) http://domain.com/api/alpha/
+ * │   │   ├── beta.solos.js  <-- (DELETE...PUT) http://domain.com/api/alpha/beta
  * │   │   └── me  <-- 'me' is a special directory name that signals route parameters
  * │   │       ├── beta
  * │   │       │   └── me
- * │   │       │       └── gama
- * │   │       │           └── solos.js  <-- (DELETE...PUT) http://domain.com/api/alpha/:alphaId/beta/:betaId/gama/
- * │   │       └── sample
- * │   │           └── solos.js  <-- (DELETE...PUT) http://domain.com/api/alpha/:alphaId/sample/
+ * │   │       │       └── gama.solos.js  <-- (DELETE...PUT) http://domain.com/api/alpha/:alphaId/beta/:betaId/gama
+ * │   │       └── delta.solos.js  <-- (DELETE...PUT) http://domain.com/api/alpha/:alphaId/delta
  *
- *  **solos.js files should not be directly in a 'me' directory**
  */
+
 /* eslint-enable */
 
 'use strict';
+
 /**
  * Lifecycle function name that indicates a request to execute the method has been received.
  * The request has been authenticated **BUT NOT authorized** as this point
@@ -58,7 +60,7 @@ exports.receive = async function receive(context) {
 /**
  * Lifecycle function name that indicates a request to execute the method has been received.
  * The request has been authenticated **BUT NOT authorized** as this point
- * in the lifecycle!
+ * in the lifecycle.
  */
 exports.receive_find = async function receive_find(context) {
   context.log.debug('Callback successful', {
@@ -156,7 +158,6 @@ exports.after = async function after(context) {
 /**
  * Lifecycle function name for post-processing and cleanup.
  * This is only called if the service method was called.
- * This is called for every service method.
  */
 exports.after_find = async function after_find(context) {
   context.log.debug('Callback successful', {

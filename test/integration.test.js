@@ -9,7 +9,7 @@
 
 
 const feathers = require('@feathersjs/feathers');
-const solos = require('../main');
+const solos = require('../solos');
 const app = feathers();
 const callbacks = ['receive', 'validate', 'authorize', 'before', 'after'];
 const calls = ['remove', 'get', 'find', 'patch', 'create', 'update'];

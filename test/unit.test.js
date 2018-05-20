@@ -4,29 +4,26 @@
 
 /*global expect*/
 
-
 'use strict';
 
 const path = require('path');
-const feathers = require('@feathersjs/feathers');
 const deified = require('deified');
-const solos = require('../main');
-const methods = require('../methods');
-const resources = path.join(__dirname, 'resource');
+const services = require('../services');
+const resources = path.join(__dirname, 'api');
 const deifiedConfig = {
   glob: {
-    globs: ['**/solos.js'],
+    globs: ['**/*.solos.js'],
   },
 };
 
 
 describe('Methods should...', () => {
   test('scan for method files with default configuration', async() => {
-    const files = await methods.deify(deified, resources);
+    const files = await services.deify(deified, resources);
     expect.assertions(files.length);
 
     files.forEach(file => {
-      expect(file).toEqual(expect.stringMatching(/[/]solos[.]js$/));
+      expect(file).toEqual(expect.stringMatching(/[.]solos[.]js$/));
     });
   });
 
@@ -34,7 +31,7 @@ describe('Methods should...', () => {
     const deify = deified.configure(deifiedConfig);
     const files = await deify({ directory: resources });
     const bindings = { remove: 0, get: 0, find: 0, patch: 0, create: 0, update: 0 };
-    const endpoints = methods.process(files);
+    const endpoints = services.process(files);
 
     expect.assertions(Object.keys(bindings) + endpoints.length);
 
@@ -60,7 +57,7 @@ describe('Methods should...', () => {
 
     files.base = resources;
 
-    const endpoints = methods.process(files, { skip: 'toskip' }, require);
+    const endpoints = services.process(files, { skip: 'toskip' }, require);
 
     expect.assertions(Object.keys(bindings) + endpoints.length);
 

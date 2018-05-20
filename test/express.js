@@ -6,7 +6,7 @@
 
 const express = require('@feathersjs/express');
 const feathers = require('@feathersjs/feathers');
-const solos = require('../main');
+const solos = require('../solos');
 const services = feathers();
 
 // This creates an app that is both, an Express and Feathers app
