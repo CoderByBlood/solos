@@ -12,15 +12,17 @@ const me = /([/]([^/]+)[/])me([/])/g;
 const end = /[.]solos[.]js$/;
 const param = '$1:$2Id$3';
 const d = require('debug');
+const globby = require('globby');
+
 const ns = 'solos:';
 const log = {
   debug: {
     process: d(`${ns}process`),
-    deify: d(`${ns}deify`),
+    glob: d(`${ns}glob`),
   },
   trace: {
     process: d(`${ns}process:trace`),
-    deify: d(`${ns}deify:trace`),
+    glob: d(`${ns}glob:trace`),
   },
 };
 
@@ -29,10 +31,9 @@ const log = {
  * - `glob: {globs: ['**`&#8205;`/*.solos.js'], }` the default is all solos.js files
  *   in subdirectories
  */
-const defaultDeifiedConfig = {
-  glob: {
-    globs: ['**/*.solos.js'],
-  },
+const defaultGlobConfig = {
+  globs: ['**/*.solos.js', '!node_modules/**/*'],
+  absolute: true,
 };
 
 const calls = ['remove', 'get', 'find', 'patch', 'create', 'update'];
@@ -46,13 +47,15 @@ const calls = ['remove', 'get', 'find', 'patch', 'create', 'update'];
  * - `trace:` with namespace 'solos:{service}:trace' - for tracing function calls
  */
 function getLog(call) {
-  return log[call] ? log[call] : log[call] = {
+  log[call] = log[call] || {
     debug: d(`${ns}${call}`),
     trace: d(`${ns}${call}:trace`),
   };
+
+  return log[call];
 }
 
-//const defaultProcessConfig = {}; //not needed yet
+// const defaultProcessConfig = {}; //not needed yet
 
 /**
  * Translates the full path to a file into a relative path with route parameters
@@ -68,7 +71,7 @@ function getLog(call) {
  * @return {string} relative path with route parameters
  */
 function toPath(file, base) {
-  //two regex passes are required because regexes do not match replaced content
+  // two regex passes are required because regexes do not match replaced content
   log.trace.process({ enter: 'toPath', args: { file, base } });
   return file.replace(base, '').replace(me, param).replace(me, param).replace(end, '');
 }
@@ -95,19 +98,18 @@ module.exports = {
    */
   process(files, config, toModule = require, toURI = toPath) {
     log.trace.process({ enter: 'process', args: { files, config, toModule, toURI } });
-    //const conf = Object.assign({}, defaultProcessConfig, config); //not needed yet
+    // const conf = Object.assign({}, defaultProcessConfig, config); //not needed yet
     const services = [];
 
-    files.forEach(file => {
+    files.forEach((file) => {
       const solos = toModule(file);
-      const path = toURI(file, files.base || process.cwd());
-      const endpoint = { path, solos };
+      const uri = toURI(file, files.base || process.cwd());
+      const endpoint = { path: uri, solos };
 
-      calls.forEach(call => {
+      calls.forEach((call) => {
         const impl = solos[call];
         if (impl && typeof impl === 'function') {
-          solos[call] = async function() {
-            const args = Array.apply(null, arguments);
+          solos[call] = async function doCall(...args) {
             args.push(getLog(call));
 
             return impl.apply(impl.this, args);
@@ -132,18 +134,17 @@ module.exports = {
    * 1. `glob: {globs: ['**`&#8205;`/*.solos.js'], }` the default is all solos.js
    * files in subdirectories
    *
-   * @param {object} deified **required** The deified module
    * @param {object} directory **required** The root directory to scan for files
    * @param {object} config **optional** The configuration passed to
    * deified module - see their docs:
    */
-  async deify(deified, directory, config) {
-    log.trace.deify({ enter: 'deify', args: { deified, directory, config } });
+  async glob(directory, config) {
+    log.trace.glob({ enter: 'glob', args: { directory, config } });
 
-    const conf = Object.assign({}, defaultDeifiedConfig, config);
-    log.debug.deify({ conf });
+    const conf = Object.assign({}, defaultGlobConfig, config);
+    conf.cwd = directory;
+    log.debug.glob({ conf });
 
-    const deify = deified.configure(conf);
-    return await deify({ directory });
+    return globby(conf.globs, conf);
   },
 };
