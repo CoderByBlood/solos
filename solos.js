@@ -8,9 +8,9 @@
  * @module solos
  */
 
-const deified = require('deified');
 const services = require('./services');
 const d = require('debug');
+
 const ns = 'solos:';
 const logs = {};
 const log = {
@@ -42,11 +42,14 @@ const log = {
  */
 const defaultConfig = {
   directory: process.cwd(),
-  deified: {},
+  globby: {
+    globs: ['**/*.solos.js', '!**/node_modules/**/*'],
+    absolute: true,
+  },
   services: {},
   hooks: {
-    before: ['receive', 'validate', 'authorize', 'before', ],
-    after: ['after', ],
+    before: ['receive', 'validate', 'authorize', 'before'],
+    after: ['after'],
   },
 };
 
@@ -78,36 +81,36 @@ function setupLogs(conf) {
   beforecalls.length = 0;
   aftercalls.length = 0;
 
-  conf.hooks.before.forEach(hook => {
+  conf.hooks.before.forEach((hook) => {
     beforecalls.push(hook);
     logs[hook] = {
       debug: d(`${ns}hook:${hook}`),
-      trace: d(`${ns}hook:${hook}:trace`)
+      trace: d(`${ns}hook:${hook}:trace`),
     };
 
-    calls.forEach(call => {
+    calls.forEach((call) => {
       const beforecall = `${hook}_${call}`;
       beforecalls.push(beforecall);
       logs[beforecall] = {
         debug: d(`${ns}hook:${beforecall}`),
-        trace: d(`${ns}hook:${beforecall}:trace`)
+        trace: d(`${ns}hook:${beforecall}:trace`),
       };
     });
   });
 
-  conf.hooks.after.forEach(hook => {
+  conf.hooks.after.forEach((hook) => {
     aftercalls.push(hook);
     logs[hook] = {
       debug: d(`${ns}hook:${hook}`),
-      trace: d(`${ns}hook:${hook}:trace`)
+      trace: d(`${ns}hook:${hook}:trace`),
     };
 
-    calls.forEach(call => {
+    calls.forEach((call) => {
       const aftercall = `${hook}_${call}`;
       aftercalls.push(aftercall);
       logs[aftercall] = {
         debug: d(`${ns}hook:${aftercall}`),
-        trace: d(`${ns}hook:${aftercall}:trace`)
+        trace: d(`${ns}hook:${aftercall}:trace`),
       };
     });
   });
@@ -137,7 +140,7 @@ module.exports = {
     const conf = Object.assign({}, defaultConfig, config);
     log.debug.init({ conf });
 
-    const files = await services.deify(deified, conf.directory, conf.deified);
+    const files = await services.glob(conf.directory, conf.globby);
     files.base = conf.directory;
     log.debug.init({ files });
 
@@ -148,50 +151,44 @@ module.exports = {
     log.debug.init({ beforecalls });
     log.debug.init({ aftercalls });
 
-    endpoints.forEach(endpoint => {
+    endpoints.forEach((endpoint) => {
       const end = /[_]([^_]+$)/;
 
       app.use(endpoint.path, endpoint.solos);
       app.service(endpoint.path).hooks({
         before: {
-          all: beforecalls.map(hook => {
-            return async context => {
-              log.trace.beforeall({ enter: hook, args: { hook, context } });
-              const callback = endpoint.solos[hook];
-              if (callback && typeof callback === 'function') {
-                context.log = logs[hook];
-                const method = hook.match(end);
-
-                if (!method || method[1] === context.method) {
-                  log.debug.beforeall({ calling: hook });
-                  return callback(context);
-                }
+          all: beforecalls.map(hook => async (context) => {
+            log.trace.beforeall({ enter: hook, args: { hook, context } });
+            const callback = endpoint.solos[hook];
+            if (callback && typeof callback === 'function') {
+              context.log = logs[hook];
+              const method = hook.match(end);
+              if (!method || method[1] === context.method) {
+                log.debug.beforeall({ calling: hook });
+                return callback(context);
               }
-
-              return context;
-            };
+            }
+            return context;
           }),
         },
         after: {
-          all: aftercalls.map(hook => {
-            return async context => {
-              log.trace.afterall({ enter: hook, args: { hook, context } });
-              const callback = endpoint.solos[hook];
-              if (callback && typeof callback === 'function') {
-                context.log = logs[hook];
-                const method = hook.match(end);
+          all: aftercalls.map(hook => async (context) => {
+            log.trace.afterall({ enter: hook, args: { hook, context } });
+            const callback = endpoint.solos[hook];
+            if (callback && typeof callback === 'function') {
+              context.log = logs[hook];
+              const method = hook.match(end);
 
-                if (!method || method[1] === context.method) {
-                  log.debug.afterall({ calling: hook });
-                  return callback(context);
-                }
+              if (!method || method[1] === context.method) {
+                log.debug.afterall({ calling: hook });
+                return callback(context);
               }
+            }
 
-              return context;
-            };
+            return context;
           }),
         },
       });
     });
-  }
+  },
 };

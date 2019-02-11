@@ -1,7 +1,13 @@
+/* eslint-disable camelcase */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-unused-labels */
+/* eslint-disable no-labels */
+/* eslint-disable no-undef */
 /*
  * Copyright (c) 2018 by Coder by Blood, Inc. All rights reserved.
  */
 
+// eslint-disable-next-line spaced-comment
 /*global expect jest*/
 
 
@@ -11,6 +17,7 @@
 const feathers = require('@feathersjs/feathers');
 const request = require('supertest');
 const solos = require('../solos');
+
 const callbacks = ['receive', 'validate', 'authorize', 'before', 'after'];
 const calls = ['remove', 'get', 'find', 'patch', 'create', 'update'];
 const params = {
@@ -24,7 +31,7 @@ const params = {
 
 
 describe('Solos should...', () => {
-  test('scan for method files and configure services with defaults', async() => {
+  test('scan for method files and configure services with defaults', async () => {
     const app = feathers();
     const bindings = { remove: 0, get: 0, find: 0, patch: 0, create: 0, update: 0 };
 
@@ -34,42 +41,42 @@ describe('Solos should...', () => {
 
     Object.entries(app.services).forEach(([path, service]) => {
       expect(path).toEqual(expect.stringMatching(/[^/]$/));
-      Object.keys(bindings).forEach(binding => {
+      Object.keys(bindings).forEach((binding) => {
         if (service[binding]) {
-          bindings[binding]++;
+          bindings[binding] += 1;
         }
       });
     });
 
-    Object.entries(bindings).forEach(([binding, count]) => {
+    Object.entries(bindings).forEach(([, count]) => {
       expect(count).toBeGreaterThan(0);
     });
   });
 
-  test('execute services with hooks and callbacks', async() => {
+  test('execute services with hooks and callbacks', async () => {
     const app = feathers();
     const mock = {};
-    callbacks.forEach(callback => {
+    callbacks.forEach((callback) => {
       mock[callback] = jest.fn(x => x);
 
-      calls.forEach(call => {
+      calls.forEach((call) => {
         mock[`${callback}_${call}`] = jest.fn(x => x);
       });
     });
 
-    calls.forEach(call => {
+    calls.forEach((call) => {
       mock[call] = jest.fn(x => x);
     });
 
-    await solos.init(app, undefined, x => Object.assign({}, mock));
+    await solos.init(app, undefined, () => Object.assign({}, mock));
 
     const services = app.services;
     const keys = Object.keys(services);
 
     expect.assertions(calls.length * keys.length);
 
-    await Promise.all(Object.entries(services).map(async([path, service]) => {
-      await Promise.all(calls.map(async call => {
+    await Promise.all(Object.entries(services).map(async ([, service]) => {
+      await Promise.all(calls.map(async (call) => {
         if (service[call]) {
           const p = params[call];
           await service[call](...p);
@@ -79,7 +86,7 @@ describe('Solos should...', () => {
     }));
   });
 
-  test('execute services with implementations hooks', async() => {
+  test('execute services with implementations hooks', async () => {
     const app = feathers();
     await solos.init(app);
 
@@ -87,8 +94,8 @@ describe('Solos should...', () => {
 
     expect.assertions(Object.keys(services).length);
 
-    await Promise.all(Object.entries(services).map(async([path, service]) => {
-      await Promise.all(calls.map(async call => {
+    await Promise.all(Object.entries(services).map(async ([, service]) => {
+      await Promise.all(calls.map(async (call) => {
         if (service[call]) {
           const p = params[call];
           expect(await service[call](...p)).toHaveProperty('message', 'Solos Lives!!!');
@@ -97,8 +104,8 @@ describe('Solos should...', () => {
     }));
   });
 
-  test('configured through express respond to HTTP requests', async() => {
-
+  test('configured through express respond to HTTP requests', async () => {
+    // eslint-disable-next-line global-require
     const express = require('@feathersjs/express');
     const services = feathers();
 
@@ -157,6 +164,5 @@ describe('Solos should...', () => {
       expect(res.body).toHaveProperty('params.route.alphaId', '3');
       expect(res.body).toHaveProperty('params.route.gammaId', '4');
     }
-
   });
 });
