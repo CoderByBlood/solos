@@ -27,9 +27,9 @@ const log = {
 };
 
 /**
- * The configuration passed to deified module - see their docs:
- * - `glob: {globs: ['**`&#8205;`/*.solos.js'], }` the default is all solos.js files
- *   in subdirectories
+ * The configuration passed to globby module - see their docs:
+ * - `{globs: ['**`&#8205;`/*.solos.js', '!node_modules/**`&#8205;`/*'], absolute: true}`
+ *   the default is all solos.js files in subdirectories with absolute file names
  */
 const defaultGlobConfig = {
   globs: ['**/*.solos.js', '!node_modules/**/*'],
@@ -131,8 +131,8 @@ module.exports = {
    * 1. NONE
    *
    * #### The optional configuration is: ####
-   * 1. `glob: {globs: ['**`&#8205;`/*.solos.js'], }` the default is all solos.js
-   * files in subdirectories
+   * 1. `{globs: ['**`&#8205;`/*.solos.js', '!node_modules/**`&#8205;`/*'], absolute: true}`
+   *    the default is all solos.js files in subdirectories with absolute file names
    *
    * @param {object} directory **required** The root directory to scan for files
    * @param {object} config **optional** The configuration passed to

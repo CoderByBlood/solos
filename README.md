@@ -1,16 +1,17 @@
 # SOLOS
 
-  Solos opinionates [Express](http://expressjs.com/) and
-  [Feathers](https://feathersjs.com/) to accerate development of RESTful
-  services.
+Solos opinionates [Express](http://expressjs.com/) and
+[Feathers](https://feathersjs.com/) to accerate development of RESTful
+services.
 
 ## Philosophy
 
-  The solos philosophy is that convention (over configuration) is the best
-  accerlerator to developing applications and APIs.
+The solos philosophy is that convention (over configuration) is the best
+accerlerator to developing applications and APIs.
 
 ## Directory Structure
-```
+
+```bash
 .
 ├── api  <-- configurable root directory - see config
 │   ├── alpha.solos.js  <-- (DELETE|GET|PATCH|POST|PUT) http://domain.com/api/alpha
@@ -59,54 +60,60 @@ Promise.resolve(solos.init(app, config)).then(() => {
 });
 
 ```
+
 ## Usage
-  Solos modules must export at least one service method as defined by
-  Feathersjs (See [Service documentation](https://docs.feathersjs.com/api/services.html)):
-  - `remove(...)`
-  - `get(...)`
-  - `find(...)`
-  - `patch(...)`
-  - `create(...)`
-  - `update(...)`
 
-  Solos modules may also export hooks that are called as part of the
-  request lifecycle:
-  1. `receive(context)` The beginning of the request lifecycle
-  2. `validate(context)` Validate input and parameters
-  3. `authorize(context)` Ensure the requester can perform the action
-  4. `before(context)` Last chance before request is serviced
-  5. `after(context)` After request is serviced and the end of the lifecycle
+Solos modules must export at least one service method as defined by
+Feathersjs (See [Service documentation](https://docs.feathersjs.com/api/services.html)):
 
-  Lifecycle hooks may also have a 'service method name' suffix to scope the
-  hook to only that service method.  Using a module that exports
-  `get(id, params)` and `find(params)` serivce methods as an example:
-  - `receive(context)` called for both `get` and `find` service requests
-  - `receive_get(context)` called for only `get` service requests
-  - `receive_find(context)` called for only `find` serivce requests
+- `remove(...)`
+- `get(...)`
+- `find(...)`
+- `patch(...)`
+- `create(...)`
+- `update(...)`
 
-  Exported functions are called in the following order:
-  1. `receive(context)`
-  2. `receive_[remove|get|find|patch|create|update](context)`
-  3. `validate(context)`
-  4. `validate_[remove|get|find|patch|create|update](context)`
-  5. `authorize(context)`
-  6. `authorize_[remove|get|find|patch|create|update](context)`
-  7. `before(context)`
-  8. `before_[remove|get|find|patch|create|update](context)`
-  9. `[remove|get|find|patch|create|update](...)`
-  10. `after(context)`
-  11. `after_[remove|get|find|patch|create|update](context)`
+Solos modules may also export hooks that are called as part of the
+request lifecycle:
 
-  The 'context' parameter has properties documented by Feathersjs
-  (see [Hook documentation](https://docs.feathersjs.com/api/hooks.html)).
-  It has an addtional `log` property.  `log.debug()` for general debugging
-  and `log.trace()` for detailed tracing - both are from the debug module.
+1. `receive(context)` The beginning of the request lifecycle
+2. `validate(context)` Validate input and parameters
+3. `authorize(context)` Ensure the requester can perform the action
+4. `before(context)` Last chance before request is serviced
+5. `after(context)` After request is serviced and the end of the lifecycle
 
+Lifecycle hooks may also have a 'service method name' suffix to scope the
+hook to only that service method.  Using a module that exports
+`get(id, params)` and `find(params)` serivce methods as an example:
 
-  The mapping between HTTP Methods and service methods are defined by Featherjs
-  (see [REST documentation](https://docs.feathersjs.com/guides/basics/rest.html)).
+- `receive(context)` called for both `get` and `find` service requests
+- `receive_get(context)` called for only `get` service requests
+- `receive_find(context)` called for only `find` serivce requests
+
+Exported functions are called in the following order:
+
+1. `receive(context)`
+2. `receive_[remove|get|find|patch|create|update](context)`
+3. `validate(context)`
+4. `validate_[remove|get|find|patch|create|update](context)`
+5. `authorize(context)`
+6. `authorize_[remove|get|find|patch|create|update](context)`
+7. `before(context)`
+8. `before_[remove|get|find|patch|create|update](context)`
+9. `[remove|get|find|patch|create|update](...)`
+10. `after(context)`
+11. `after_[remove|get|find|patch|create|update](context)`
+
+The 'context' parameter has properties documented by Feathersjs
+(see [Hook documentation](https://docs.feathersjs.com/api/hooks.html)).
+It has an addtional `log` property.  `log.debug()` for general debugging
+and `log.trace()` for detailed tracing - both are from the debug module.
+
+The mapping between HTTP Methods and service methods are defined by Featherjs
+(see [REST documentation](https://docs.feathersjs.com/guides/basics/rest.html)).
 
 ### Example solos service (endpoint.solos.js)
+
 ```js
 'use strict';
 
@@ -231,58 +238,59 @@ exports.after_find = async function after_find(context) {
   return context;
 };
 ```
-## Configuration ##
 
-  Solos configuration opject for `solos.init(app, config)` can have
-  the following properties:
-  - `directory: '...'` - the full path to the directory to scan
-    for solos files, defaults to current working directory
-  - `deified: {...}` - the configuration passed to deified module, see its docs:
-    - `glob: {globs: ['**/*.solos.js'], }` the default is all solos.js
-       files in subdirectories
-  - `hooks:{...}` has two properties `before` and `after`
-    - `before: ['receive', 'validate', 'authorize', 'before', ]` the
-       callback **before** hooks, in the order called
-    - `after: ['after', ]` the callback **after** hooks, in the
-       order called
+## Configuration
+
+Solos configuration opject for `solos.init(app, config)` can have the following
+properties:
+
+- `directory: '...'` - the full path to the directory to scan for solos files,
+defaults to current working directory
+- `globby: {...}` - the configuration passed to globby module, see its docs:
+  - `{globs: ['**/*.solos.js', '!node_modules/**/*'], absolute: true}` the default
+  is all solos.js files in subdirectories with absolute file names
+- `hooks:{...}` has two properties `before` and `after`
+  - `before: ['receive', 'validate', 'authorize', 'before', ]` the callback
+  **before** hooks, in the order called
+  - `after: ['after', ]` the callback **after** hooks, in the order called
 
 ## Installation
 
 ```bash
-$ npm install solos
+npm install solos
 ```
 
 ## Features
 
-  * Coming Soon
+- Coming Soon
 
 ## Docs & Community
 
-  * Coming Soon
+- Coming Soon
 
 ## Examples
 
-  To view an example, clone the solos repo and install the dependencies:
+To view an example, clone the solos repo and install the dependencies:
 
 ```bash
-$ git clone git://github.com/CoderByBlood/solos.git --depth 1
-$ cd solos
-$ npm install
+git clone git://github.com/CoderByBlood/solos.git --depth 1
+cd solos
+npm install
 ```
 
-  Then run the example:
+Then run the example:
 
 ```bash
-$ npm start
+npm start
 ```
 
 ## Tests
 
-  To run the test suite, first install the dependencies, then run `npm test`:
+To run the test suite, first install the dependencies, then run `npm test`:
 
 ```bash
-$ npm install
-$ npm test
+npm install
+npm test
 ```
 
 ## People
@@ -291,5 +299,5 @@ $ npm test
 
 ## License
 
-  Copyright (c) 2016 Coder by Blood, Inc;
-  Licensed under [MIT](LICENSE)
+Copyright (c) 2016 Coder by Blood, Inc;
+Licensed under [MIT](LICENSE)
