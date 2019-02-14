@@ -30,10 +30,10 @@ const log = {
  * The default configuration for the init function
  * 1. `directory: process.cwd()` - the full path to the directory to scan
  *    for solos files, defaults to current working directory
- * 2. `deified: {...}` - the configuration passed to deified module - see
+ * 2. `globby: {...}` - the configuration passed to globby module - see
  *    their docs:
- *    1. `glob: {globs: ['**`&#8205;`/*.solos.js'], }` the default is all solos.js
- *       files in subdirectories
+ *    1. `{globs: ['**`&#8205;`/*.solos.js', '!node_modules/**`&#8205;`/*'], absolute: true}`
+ *       the default is all solos.js files in subdirectories with absolute file names
  * 3. `hooks:{...}` has two properties `before` and `after`
  *    1. `before: ['receive', 'validate', 'authorize', 'before', ]` the
  *       callback **before** hooks, in the order called
